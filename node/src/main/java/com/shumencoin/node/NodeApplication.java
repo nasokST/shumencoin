@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.shumencoin.beans.Node;
+
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.shumencoin.*" })
 public class NodeApplication {
@@ -23,9 +25,9 @@ public class NodeApplication {
 	}
 
 	@Bean
-	public NodeManager nodeManager() {
+	public Node nodeManager() {
 
-		NodeManager nodeManager = new NodeManager();
+		Node nodeManager = new Node();
 		nodeManager.initializeNode("127.0.0.1", 8080);
 
 		return nodeManager;

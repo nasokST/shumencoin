@@ -1,4 +1,4 @@
-package com.shumencoin.beans;
+package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 
@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @author dragomir.todorov
  *
  */
-public class Block implements Serializable  {
+public class BlockData implements Serializable  {
 
 	/**
 	 * 

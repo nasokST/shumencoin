@@ -1,4 +1,4 @@
-package com.shumencoin.beans;
+package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -12,22 +12,22 @@ import java.util.Map;
  * @author dragomir.todorov
  *
  */
-public class Blockchain implements Serializable  {
+public class BlockchainData implements Serializable  {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 4828564175718932172L;
 
-	private List<Block> blocks; // Block[]
-	private List<Transaction> pendingTransactions; // Transaction[]
+	private List<BlockData> blocks; // Block[]
+	private List<TransactionData> pendingTransactions; // Transaction[]
 	private long currentDificulty; // integer
-	private Map<String, Block> miningJobs; // map(blockDataHash => Block)
-	
-	public Blockchain(Block genesisBlock, long startDifficulty) {
-		this.blocks = new LinkedList<Block>(Arrays.asList(genesisBlock));
-		this.pendingTransactions = new LinkedList<Transaction>();
+	private Map<String, BlockData> miningJobs; // map(blockDataHash => Block)
+
+	public BlockchainData(BlockData genesisBlock, long startDifficulty) {
+		this.blocks = new LinkedList<BlockData>(Arrays.asList(genesisBlock));
+		this.pendingTransactions = new LinkedList<TransactionData>();
 		this.currentDificulty = startDifficulty;
-		this.miningJobs = new HashMap<String, Block>();
+		this.miningJobs = new HashMap<String, BlockData>();
 	}
 	//	constructor(genesisBlock, startDifficulty) {
 	//        this.blocks = [genesisBlock]; // Block[]
@@ -36,19 +36,19 @@ public class Blockchain implements Serializable  {
 	//        this.miningJobs = {}; // map(blockDataHash => Block)
 	//}
 
-	public List<Block> getBlocks() {
+	public List<BlockData> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(List<Block> blocks) {
+	public void setBlocks(List<BlockData> blocks) {
 		this.blocks = blocks;
 	}
 
-	public List<Transaction> getPendingTransactions() {
+	public List<TransactionData> getPendingTransactions() {
 		return pendingTransactions;
 	}
 
-	public void setPendingTransactions(List<Transaction> pendingTransactions) {
+	public void setPendingTransactions(List<TransactionData> pendingTransactions) {
 		this.pendingTransactions = pendingTransactions;
 	}
 
@@ -60,11 +60,11 @@ public class Blockchain implements Serializable  {
 		this.currentDificulty = currentDificulty;
 	}
 
-	public Map<String, Block> getMiningJobs() {
+	public Map<String, BlockData> getMiningJobs() {
 		return miningJobs;
 	}
 
-	public void setMiningJobs(Map<String, Block> miningJobs) {
+	public void setMiningJobs(Map<String, BlockData> miningJobs) {
 		this.miningJobs = miningJobs;
 	}
 	

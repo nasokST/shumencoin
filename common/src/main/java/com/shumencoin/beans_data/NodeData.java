@@ -1,4 +1,4 @@
-package com.shumencoin.beans;
+package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -10,8 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author dragomir.todorov
  *
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class Node implements Serializable {
+public class NodeData implements Serializable {
 	/**
 	 * 
 	 */
@@ -20,9 +19,7 @@ public class Node implements Serializable {
 	private String nodeId; // the nodeId uniquely identifies the current node
 	URL selfUrl;
 	private Map<String, String> peers; // a map(nodeId --> url) of the peers, connected to this node
-	private String chainId; // the unique chain ID (hash of the genesis block)
-	private Blockchain blockchain; // the blockchain (blocks, transactions, ...)
-	
+
 	public String getNodeId() {
 		return nodeId;
 	}
@@ -40,18 +37,5 @@ public class Node implements Serializable {
 	}
 	public void setPeers(Map<String, String> peers) {
 		this.peers = peers;
-	}
-	public String getChainId() {
-		return chainId;
-	}
-	public void setChainId(String chainId) {
-		this.chainId = chainId;
-	}
-	public Blockchain getBlockchain() {
-		return blockchain;
-	}
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public void setBlockchain(Blockchain blockchain) {
-		this.blockchain = blockchain;
 	}
 }

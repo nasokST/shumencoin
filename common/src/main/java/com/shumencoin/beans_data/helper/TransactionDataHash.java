@@ -1,4 +1,4 @@
-package com.shumencoin.beans.helper;
+package com.shumencoin.beans_data.helper;
 
 public class TransactionDataHash {
 	public String from;

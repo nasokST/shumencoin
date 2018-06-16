@@ -1,4 +1,4 @@
-package com.shumencoin.beans;
+package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 

@@ -1,14 +1,14 @@
 package com.shumencoin.factory;
 
-import com.shumencoin.beans.Transaction;
-import com.shumencoin.beans.helper.TransactionDataHash;
+import com.shumencoin.beans_data.TransactionData;
+import com.shumencoin.beans_data.helper.TransactionDataHash;
 
 public class TransactionFactory {
 
-	public Transaction createTransaction(String from, String to, long value, long fee, String dateCreated,
+	public TransactionData createTransaction(String from, String to, long value, long fee, String dateCreated,
 			String data, String senderPubKey, String transactionDataHash, String senderSignature,
 			long minedInBlockIndex, boolean transferSuccessful) {
-		Transaction transaction = new Transaction(from, to, value, fee, dateCreated, data, senderPubKey,
+		TransactionData transaction = new TransactionData(from, to, value, fee, dateCreated, data, senderPubKey,
 				transactionDataHash, senderSignature, minedInBlockIndex, transferSuccessful);
 		if (transaction.getTransactionDataHash() == null || "".equals(transaction.getTransactionDataHash())) {
 			TransactionDataHash hashHelper = new TransactionDataHash();

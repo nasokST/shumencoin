@@ -14,6 +14,13 @@
 		<jackson.version>2.9.4</jackson.version>		
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>com.shumencoin</groupId>
+			<artifactId>calc</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>	
+	
 		<!-- Jackson due to SpringBootStarterParent dependency problems -->
 		<dependency>
 		   <groupId>com.fasterxml.jackson.core</groupId>

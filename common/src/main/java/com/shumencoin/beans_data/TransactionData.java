@@ -1,8 +1,8 @@
-package com.shumencoin.beans;
+package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 
-public class Transaction implements Serializable {
+public class TransactionData implements Serializable {
 	/**
 	 * 
 	 */
@@ -20,7 +20,7 @@ public class Transaction implements Serializable {
     private long minedInBlockIndex; //integer
     private boolean transferSuccessful; // boolean
     
-	public Transaction(String from, String to, long value, long fee, String dateCreated, String data,
+	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
 			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
 			boolean transferSuccessful) {
 		super();
