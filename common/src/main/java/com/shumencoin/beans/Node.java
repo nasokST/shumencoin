@@ -1,17 +1,24 @@
 package com.shumencoin.beans;
 
+import java.io.Serializable;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Node bean structure
  * @author dragomir.todorov
  *
  */
-public class Node {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Node implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5673193831889685431L;
+
 	private String nodeId; // the nodeId uniquely identifies the current node
-	private String host; // the external host / IP address to connect to this node
-	private Integer port; // listening TCP port number
-	private String selfUrl; // the external base URL of the REST endpoints
+	URL selfUrl;
 	private Map<String, String> peers; // a map(nodeId --> url) of the peers, connected to this node
 	private String chainId; // the unique chain ID (hash of the genesis block)
 	private Blockchain blockchain; // the blockchain (blocks, transactions, ...)
@@ -22,24 +29,12 @@ public class Node {
 	public void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
 	}
-	public String getHost() {
-		return host;
-	}
-	public void setHost(String host) {
-		this.host = host;
-	}
-	public Integer getPort() {
-		return port;
-	}
-	public void setPort(Integer port) {
-		this.port = port;
-	}
 	public String getSelfUrl() {
-		return selfUrl;
+		return selfUrl.getUrl();
 	}
-	public void setSelfUrl(String selfUrl) {
+	public void setSelfUrl(URL selfUrl) {
 		this.selfUrl = selfUrl;
-	}
+	}	
 	public Map<String, String> getPeers() {
 		return peers;
 	}
@@ -55,8 +50,8 @@ public class Node {
 	public Blockchain getBlockchain() {
 		return blockchain;
 	}
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	public void setBlockchain(Blockchain blockchain) {
 		this.blockchain = blockchain;
 	}
-	
 }

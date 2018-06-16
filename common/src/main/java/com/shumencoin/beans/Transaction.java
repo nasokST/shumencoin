@@ -1,20 +1,27 @@
 package com.shumencoin.beans;
 
-public class Transaction {
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1488991650030440927L;
+
 	private String from; // Sender address: 40 hex digits
     private String to; // Recipient address: 40 hex digits
-    private Integer value; // Transfer value: integer
-    private Integer fee; // Mining fee: integer
+    private long value; // Transfer value: integer
+    private long fee; // Mining fee: integer
     private String dateCreated; // ISO-8601 string
     private String data; // Optional data (e.g. payload or comments): string
     private String senderPubKey; // 65 hex digits
     private String transactionDataHash;  // 64 hex digits  // Calculate the transaction data hash if it is missing
     private String senderSignature; // hex_number[2][64]
-    private Integer minedInBlockIndex; //integer
+    private long minedInBlockIndex; //integer
     private boolean transferSuccessful; // boolean
     
-	public Transaction(String from, String to, Integer value, Integer fee, String dateCreated, String data,
-			String senderPubKey, String transactionDataHash, String senderSignature, Integer minedInBlockIndex,
+	public Transaction(String from, String to, long value, long fee, String dateCreated, String data,
+			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
 			boolean transferSuccessful) {
 		super();
 		this.from = from;
@@ -42,16 +49,16 @@ public class Transaction {
 	public void setTo(String to) {
 		this.to = to;
 	}
-	public Integer getValue() {
+	public long getValue() {
 		return value;
 	}
-	public void setValue(Integer value) {
+	public void setValue(long value) {
 		this.value = value;
 	}
-	public Integer getFee() {
+	public long getFee() {
 		return fee;
 	}
-	public void setFee(Integer fee) {
+	public void setFee(long fee) {
 		this.fee = fee;
 	}
 	public String getDateCreated() {
@@ -84,10 +91,10 @@ public class Transaction {
 	public void setSenderSignature(String senderSignature) {
 		this.senderSignature = senderSignature;
 	}
-	public Integer getMinedInBlockIndex() {
+	public long getMinedInBlockIndex() {
 		return minedInBlockIndex;
 	}
-	public void setMinedInBlockIndex(Integer minedInBlockIndex) {
+	public void setMinedInBlockIndex(long minedInBlockIndex) {
 		this.minedInBlockIndex = minedInBlockIndex;
 	}
 	public boolean isTransferSuccessful() {

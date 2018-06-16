@@ -1,5 +1,6 @@
 package com.shumencoin.beans;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,13 +12,18 @@ import java.util.Map;
  * @author dragomir.todorov
  *
  */
-public class Blockchain {
+public class Blockchain implements Serializable  {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4828564175718932172L;
+
 	private List<Block> blocks; // Block[]
 	private List<Transaction> pendingTransactions; // Transaction[]
-	private Integer currentDificulty; // integer
+	private long currentDificulty; // integer
 	private Map<String, Block> miningJobs; // map(blockDataHash => Block)
 	
-	public Blockchain(Block genesisBlock, Integer startDifficulty) {
+	public Blockchain(Block genesisBlock, long startDifficulty) {
 		this.blocks = new LinkedList<Block>(Arrays.asList(genesisBlock));
 		this.pendingTransactions = new LinkedList<Transaction>();
 		this.currentDificulty = startDifficulty;
@@ -46,11 +52,11 @@ public class Blockchain {
 		this.pendingTransactions = pendingTransactions;
 	}
 
-	public Integer getCurrentDificulty() {
+	public long getCurrentDificulty() {
 		return currentDificulty;
 	}
 
-	public void setCurrentDificulty(Integer currentDificulty) {
+	public void setCurrentDificulty(long currentDificulty) {
 		this.currentDificulty = currentDificulty;
 	}
 
