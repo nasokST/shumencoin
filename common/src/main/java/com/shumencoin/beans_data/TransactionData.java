@@ -20,6 +20,9 @@ public class TransactionData implements Serializable {
     private long minedInBlockIndex; //integer
     private boolean transferSuccessful; // boolean
     
+    public TransactionData() {
+    }
+    
 	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
 			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
 			boolean transferSuccessful) {

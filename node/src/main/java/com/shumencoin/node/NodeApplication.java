@@ -25,12 +25,12 @@ public class NodeApplication {
 	}
 
 	@Bean
-	public Node nodeManager() {
+	public Node node() {
 
-		Node nodeManager = new Node();
-		nodeManager.initializeNode("127.0.0.1", 8080);
+		Node node = new Node();
+		node.initializeNode("127.0.0.1", 8080);
 
-		return nodeManager;
+		return node;
 	}
 
     @Bean

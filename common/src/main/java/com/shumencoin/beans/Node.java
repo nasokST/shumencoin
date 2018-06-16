@@ -41,11 +41,7 @@ public class Node implements Serializable{
 		node.setPeers(peers);
 
 		blockchain = new Blockchain();
-		blockchain.setChainId("1");
-	}
-
-	public void resetToGenesisBlock() throws Exception {
-		throw new Exception("!!! NOT IMPLEMENTED !!!");
+		blockchain.initializeNode();
 	}
 
 	private String generateNodeId() {
