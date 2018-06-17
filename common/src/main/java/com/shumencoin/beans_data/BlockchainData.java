@@ -29,12 +29,6 @@ public class BlockchainData implements Serializable  {
 		this.currentDificulty = startDifficulty;
 		this.miningJobs = new HashMap<String, BlockData>();
 	}
-	//	constructor(genesisBlock, startDifficulty) {
-	//        this.blocks = [genesisBlock]; // Block[]
-	//        this.pendingTransactions = []; // Transaction[]
-	//        this.currentDifficulty = startDifficulty; // integer
-	//        this.miningJobs = {}; // map(blockDataHash => Block)
-	//}
 
 	public List<BlockData> getBlocks() {
 		return blocks;
@@ -67,5 +61,4 @@ public class BlockchainData implements Serializable  {
 	public void setMiningJobs(Map<String, BlockData> miningJobs) {
 		this.miningJobs = miningJobs;
 	}
-	
 }

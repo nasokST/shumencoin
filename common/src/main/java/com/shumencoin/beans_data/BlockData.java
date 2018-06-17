@@ -6,11 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.shumencoin.databind.ByteArrayDeserializer;
-import com.shumencoin.databind.ByteArraySerializer;
-
 /**
  * 
  * @author dragomir.todorov
@@ -24,17 +19,33 @@ public class BlockData implements Serializable  {
 	private static final long serialVersionUID = -1866556881435507147L;
 	
 	public BlockData() {
-		blockDataHash = new byte[32];		
 		transactions = new ArrayList<TransactionData>();
-		blockHash = new byte[32];
-		prevBlockHash = new byte[32];		
 	}
 
+	public BlockData(long index, long dificulty, String minedBy, List<TransactionData>transactions, String prevBlockHash) {
+		this.setIndex(index);
+		this.setDificulty(dificulty);
+		this.setMinedBy(minedBy);
+		this.setTransactions(transactions);
+		this.setPrevBlockHash(prevBlockHash);
+	}
+	
+	public void clone(BlockData other) {
+		this.setIndex(other.getIndex());
+		this.setDificulty(other.getDificulty());
+		this.setMinedBy(other.getMinedBy());
+		this.setNonce(other.getNonce());
+		this.setCreationDate(other.getCreationDate());
+		this.setBlockDataHash(other.getBlockDataHash());		
+		this.setTransactions(other.getTransactions());
+		this.setBlockHash(other.getBlockHash());
+		this.setPrevBlockHash(other.prevBlockHash);
+	}	
 
-	public BigInteger getIndex() {
+	public long getIndex() {
 		return index;
 	}
-	public void setIndex(BigInteger index) {
+	public void setIndex(long index) {
 		this.index = index;
 	}
 	public long getDificulty() {
@@ -61,44 +72,38 @@ public class BlockData implements Serializable  {
 	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
-	public byte[] getBlockDataHash() {
-		return blockDataHash;
-	}
-	public void setBlockDataHash(byte[] blockDataHash) {
-		this.blockDataHash = blockDataHash;
-	}
 	public List<TransactionData> getTransactions() {
 		return transactions;
 	}
 	public void setTransactions(List<TransactionData> transactions) {
 		this.transactions = transactions;
 	}
-	public byte[] getBlockHash() {
+	public String getBlockDataHash() {
+		return blockDataHash;
+	}
+	public void setBlockDataHash(String blockDataHash) {
+		this.blockDataHash = blockDataHash;
+	}
+	public String getBlockHash() {
 		return blockHash;
 	}
-	public void setBlockHash(byte[] blockHash) {
+	public void setBlockHash(String blockHash) {
 		this.blockHash = blockHash;
 	}
-	public byte[] getPrevBlockHash() {
+	public String getPrevBlockHash() {
 		return prevBlockHash;
 	}
-	public void setPrevBlockHash(byte[] prevBlockHash) {
+	public void setPrevBlockHash(String prevBlockHash) {
 		this.prevBlockHash = prevBlockHash;
-	}
+	}	
 
-	private BigInteger index;
+	private long index;
 	private long dificulty;
 	private String minedBy;
 	private BigInteger nonce;
 	private LocalDateTime creationDate;
-	@JsonDeserialize(using = ByteArrayDeserializer.class)
-	@JsonSerialize(using = ByteArraySerializer.class)	
-	private byte[] blockDataHash;
+	private String blockDataHash;
 	private List<TransactionData> transactions;	
-	@JsonDeserialize(using = ByteArrayDeserializer.class)
-	@JsonSerialize(using = ByteArraySerializer.class)	
-	private byte[] blockHash;
-	@JsonDeserialize(using = ByteArrayDeserializer.class)
-	@JsonSerialize(using = ByteArraySerializer.class)	
-	private byte[] prevBlockHash;
+	private String blockHash;
+	private String prevBlockHash;
 }

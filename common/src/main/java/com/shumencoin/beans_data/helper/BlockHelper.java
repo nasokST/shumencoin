@@ -1,9 +1,17 @@
 package com.shumencoin.beans_data.helper;
 
+import java.io.Serializable;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shumencoin.beans_data.BlockData;
+import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.constants.Constants;
+import com.shumencoin.convertion.Converter;
 import com.shumencoin.crypto.Crypto;
 
 public class BlockHelper {
@@ -11,7 +19,7 @@ public class BlockHelper {
 	public static BlockData generateGenesisBlock() {
 		BlockData genesisBlock = new BlockData();
 
-		genesisBlock.setIndex(new BigInteger("0"));
+		genesisBlock.setIndex(0);
 		genesisBlock.setDificulty(0);
 		genesisBlock.setMinedBy(Constants.genesisAddress);
 		genesisBlock.setNonce(new BigInteger("0"));
@@ -19,21 +27,51 @@ public class BlockHelper {
 		genesisBlock.setBlockDataHash(calculateBlockDataHash(genesisBlock));
 		genesisBlock.getTransactions().add(TransactionHelper.generateGenesisTransaction());
 		genesisBlock.setBlockHash(calculateBlockHash(genesisBlock));
-		genesisBlock.setPrevBlockHash(Constants.genesisPrevBlockHash);
+		genesisBlock.setPrevBlockHash(Converter.byteArrayToHexString(Constants.genesisPrevBlockHash));
 
 		return genesisBlock;
 	}
 
-	public static byte[] calculateBlockDataHash(BlockData block) {
+	public static String calculateBlockDataHash(BlockData block) {
 
-		String forHashing = block.getBlockDataHash() + block.getCreationDate().toString() + block.getNonce().toString();
+		BlockDataHashHelper blockDataHashHelper = new BlockDataHashHelper();
+		
+		blockDataHashHelper.index = block.getIndex();
+		blockDataHashHelper.dificulty = block.getDificulty();
+		blockDataHashHelper.minedBy = block.getMinedBy();
+		blockDataHashHelper.transactions = block.getTransactions();
+		blockDataHashHelper.prevBlockHash = block.getPrevBlockHash();
+		
+		ObjectMapper ow = new ObjectMapper();
+		
+		try {
+			String forHashing = ow.writeValueAsString(blockDataHashHelper);
+			block.setBlockDataHash(Crypto.sha256ToString(forHashing));
+			return block.getBlockDataHash();
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
-		return Crypto.sha256(forHashing);
+		return null;
 	}
 
-	public static byte[] calculateBlockHash(BlockData block) {
+	public static String calculateBlockHash(BlockData block) {
 		String forHashing = block.getBlockDataHash() + block.getCreationDate().toString() + block.getNonce().toString();
 
-		return Crypto.sha256(forHashing);
+		block.setBlockHash(Crypto.sha256ToString(forHashing));
+		return block.getBlockHash();
 	}
+}
+
+class BlockDataHashHelper implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7775196132536963596L;
+	
+	public long index;
+	public long dificulty;
+	public String minedBy;
+	public List<TransactionData> transactions;	
+	public String prevBlockHash;
 }

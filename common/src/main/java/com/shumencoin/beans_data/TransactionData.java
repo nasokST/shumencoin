@@ -2,9 +2,11 @@ package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.kenai.jffi.Array;
 import com.shumencoin.databind.SignatureDeserializer;
 import com.shumencoin.databind.SignatureSerializer;
 
@@ -29,8 +31,27 @@ public class TransactionData implements Serializable {
     private boolean transferSuccessful; // boolean
 
     public TransactionData() {
-    	senderSignature = new byte[32][32];
+    	senderSignature = new byte[2][32];
     }
+
+    public TransactionData(TransactionData other) {
+    	
+    	this.setFrom(other.getFrom());
+    	this.setTo(other.getTo());
+    	this.setValue(other.getValue());
+    	this.setFee(other.getFee());
+    	this.setDateCreated(other.getDateCreated());
+    	this.setData(other.getData());
+    	this.setSenderPubKey(other.getSenderPubKey());
+    	this.setTransactionDataHash(other.getTransactionDataHash());
+
+    	this.senderSignature = new byte[2][32];
+    	this.senderSignature[0] = Arrays.copyOf(other.getSenderSignature()[0], other.getSenderSignature()[0].length);
+    	this.senderSignature[1] = Arrays.copyOf(other.getSenderSignature()[1], other.getSenderSignature()[1].length);
+
+    	this.setMinedInBlockIndex(other.getMinedInBlockIndex());
+    	this.setTransferSuccessful(other.isTransferSuccessful());
+    }   
 
 //	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
 //			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
