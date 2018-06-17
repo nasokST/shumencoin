@@ -1,7 +1,6 @@
 package com.shumencoin.beans;
 
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class Node implements Serializable{
 		node.setPeers(peers);
 
 		blockchain = new Blockchain();
-		blockchain.initializeNode();
+		blockchain.initializeChain();
 	}
 
 	private String generateNodeId() {
@@ -53,15 +52,7 @@ public class Node implements Serializable{
 
 		rawKey += Converter.byteArrayToHexString(randomeKey);
 
-		byte[] hash;
-		try {
-			hash = Crypto.sha256(rawKey);
-			return Converter.byteArrayToHexString(hash);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-
-		return rawKey;
+		return Crypto.sha256ToString(rawKey);
 	}
 
 	private NodeData node;

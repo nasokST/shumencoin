@@ -6,6 +6,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.shumencoin.databind.ByteArrayDeserializer;
+import com.shumencoin.databind.ByteArraySerializer;
+
 /**
  * 
  * @author dragomir.todorov
@@ -19,8 +24,12 @@ public class BlockData implements Serializable  {
 	private static final long serialVersionUID = -1866556881435507147L;
 	
 	public BlockData() {
+		blockDataHash = new byte[32];		
 		transactions = new ArrayList<TransactionData>();
+		blockHash = new byte[32];
+		prevBlockHash = new byte[32];		
 	}
+
 
 	public BigInteger getIndex() {
 		return index;
@@ -52,10 +61,10 @@ public class BlockData implements Serializable  {
 	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
-	public String getBlockDataHash() {
+	public byte[] getBlockDataHash() {
 		return blockDataHash;
 	}
-	public void setBlockDataHash(String blockDataHash) {
+	public void setBlockDataHash(byte[] blockDataHash) {
 		this.blockDataHash = blockDataHash;
 	}
 	public List<TransactionData> getTransactions() {
@@ -63,17 +72,17 @@ public class BlockData implements Serializable  {
 	}
 	public void setTransactions(List<TransactionData> transactions) {
 		this.transactions = transactions;
-	}	
-	public String getBlockHash() {
+	}
+	public byte[] getBlockHash() {
 		return blockHash;
 	}
-	public void setBlockHash(String blockHash) {
+	public void setBlockHash(byte[] blockHash) {
 		this.blockHash = blockHash;
 	}
-	public String getPrevBlockHash() {
+	public byte[] getPrevBlockHash() {
 		return prevBlockHash;
 	}
-	public void setPrevBlockHash(String prevBlockHash) {
+	public void setPrevBlockHash(byte[] prevBlockHash) {
 		this.prevBlockHash = prevBlockHash;
 	}
 
@@ -82,8 +91,14 @@ public class BlockData implements Serializable  {
 	private String minedBy;
 	private BigInteger nonce;
 	private LocalDateTime creationDate;
-	private String blockDataHash;
+	@JsonDeserialize(using = ByteArrayDeserializer.class)
+	@JsonSerialize(using = ByteArraySerializer.class)	
+	private byte[] blockDataHash;
 	private List<TransactionData> transactions;	
-	private String blockHash;
-	private String prevBlockHash;
+	@JsonDeserialize(using = ByteArrayDeserializer.class)
+	@JsonSerialize(using = ByteArraySerializer.class)	
+	private byte[] blockHash;
+	@JsonDeserialize(using = ByteArrayDeserializer.class)
+	@JsonSerialize(using = ByteArraySerializer.class)	
+	private byte[] prevBlockHash;
 }

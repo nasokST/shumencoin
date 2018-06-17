@@ -1,7 +1,5 @@
 package com.shumencoin.convertion;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.util.encoders.Hex;
 
 public class Converter {

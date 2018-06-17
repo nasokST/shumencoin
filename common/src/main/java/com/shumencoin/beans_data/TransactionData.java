@@ -1,6 +1,12 @@
 package com.shumencoin.beans_data;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.shumencoin.databind.SignatureDeserializer;
+import com.shumencoin.databind.SignatureSerializer;
 
 public class TransactionData implements Serializable {
 	/**
@@ -10,36 +16,39 @@ public class TransactionData implements Serializable {
 
 	private String from; // Sender address: 40 hex digits
     private String to; // Recipient address: 40 hex digits
-    private long value; // Transfer value: integer
+    private BigInteger value; // Transfer value: integer
     private long fee; // Mining fee: integer
     private String dateCreated; // ISO-8601 string
     private String data; // Optional data (e.g. payload or comments): string
     private String senderPubKey; // 65 hex digits
     private String transactionDataHash;  // 64 hex digits  // Calculate the transaction data hash if it is missing
-    private String senderSignature; // hex_number[2][64]
+	@JsonDeserialize(using = SignatureDeserializer.class)
+	@JsonSerialize(using = SignatureSerializer.class)	    
+    private byte[][] senderSignature; // hex_number[2][64]
     private long minedInBlockIndex; //integer
     private boolean transferSuccessful; // boolean
-    
+
     public TransactionData() {
+    	senderSignature = new byte[32][32];
     }
-    
-	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
-			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
-			boolean transferSuccessful) {
-		super();
-		this.from = from;
-		this.to = to;
-		this.value = value;
-		this.fee = fee;
-		this.dateCreated = dateCreated;
-		this.data = data;
-		this.senderPubKey = senderPubKey;
-		this.transactionDataHash = transactionDataHash;
-		this.senderSignature = senderSignature;
-		this.minedInBlockIndex = minedInBlockIndex;
-		this.transferSuccessful = transferSuccessful;
-	}
-	
+
+//	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
+//			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
+//			boolean transferSuccessful) {
+//		super();
+//		this.from = from;
+//		this.to = to;
+//		this.value = value;
+//		this.fee = fee;
+//		this.dateCreated = dateCreated;
+//		this.data = data;
+//		this.senderPubKey = senderPubKey;
+//		this.transactionDataHash = transactionDataHash;
+//		this.senderSignature = senderSignature;
+//		this.minedInBlockIndex = minedInBlockIndex;
+//		this.transferSuccessful = transferSuccessful;
+//	}
+
 	public String getFrom() {
 		return from;
 	}
@@ -52,10 +61,10 @@ public class TransactionData implements Serializable {
 	public void setTo(String to) {
 		this.to = to;
 	}
-	public long getValue() {
+	public BigInteger getValue() {
 		return value;
 	}
-	public void setValue(long value) {
+	public void setValue(BigInteger value) {
 		this.value = value;
 	}
 	public long getFee() {
@@ -88,12 +97,13 @@ public class TransactionData implements Serializable {
 	public void setTransactionDataHash(String transactionDataHash) {
 		this.transactionDataHash = transactionDataHash;
 	}
-	public String getSenderSignature() {
+	public byte[][] getSenderSignature() {
 		return senderSignature;
 	}
-	public void setSenderSignature(String senderSignature) {
+
+	public void setSenderSignature(byte[][] senderSignature) {
 		this.senderSignature = senderSignature;
-	}
+	}	
 	public long getMinedInBlockIndex() {
 		return minedInBlockIndex;
 	}
@@ -106,5 +116,4 @@ public class TransactionData implements Serializable {
 	public void setTransferSuccessful(boolean transferSuccessful) {
 		this.transferSuccessful = transferSuccessful;
 	}
-	
 }
