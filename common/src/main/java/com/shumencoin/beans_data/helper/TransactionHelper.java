@@ -19,7 +19,9 @@ public class TransactionHelper {
 							transaction.getFrom() + ", " + 
 							transaction.getSenderPubKey() + "}"; 
 
-		return Crypto.sha256ToString(forHashing);
+		transaction.setTransactionDataHash(Crypto.sha256ToString(forHashing));
+
+		return transaction.getTransactionDataHash();
 	}	
 
 	public static TransactionData generateGenesisTransaction() {

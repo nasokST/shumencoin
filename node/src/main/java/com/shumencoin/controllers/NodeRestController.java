@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BlockData;
+import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
 
@@ -109,7 +110,7 @@ public class NodeRestController {
     @GetMapping("/mining/job-request/{minerAddress}")
     public ResponseEntity<?> getMiningAskJob(@PathVariable("minerAddress") String minerAddress) {
 
-    	BlockData miningJob = new BlockData();
+    	MiningJobData miningJob = new MiningJobData();
     	ShCError error = node.getBlockchain().getNewMiningJob(minerAddress, miningJob); 
     	if (ShCError.NO_ERROR == error) {
     		return new ResponseEntity<Object>(miningJob, HttpStatus.OK);
@@ -119,9 +120,9 @@ public class NodeRestController {
     }
     
     @PostMapping("/mining/submit-new-block")
-    public ResponseEntity<?> getMiningSubmitNewBlock(@RequestBody BlockData minedBlock) {
+    public ResponseEntity<?> getMiningSubmitNewBlock(@RequestBody MiningJobData minedBlock) {
 
-    	BlockData newBlock = null;
+    	BlockData newBlock = new BlockData();
     	ShCError error = node.getBlockchain().submiteMinedBlock(minedBlock, newBlock);
     	if (ShCError.NO_ERROR == error) {
     		return new ResponseEntity<Object>(newBlock, HttpStatus.OK);

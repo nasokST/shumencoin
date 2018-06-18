@@ -1,17 +1,16 @@
 package com.shumencoin.beans;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.text.AsyncBoxView.ChildLocator;
-
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.BlockchainData;
+import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.beans_data.helper.BlockHelper;
 import com.shumencoin.beans_data.helper.TransactionHelper;
+import com.shumencoin.constants.Constants;
 import com.shumencoin.errors.ShCError;
 
 public class Blockchain implements Serializable {
@@ -37,12 +36,12 @@ public class Blockchain implements Serializable {
 
 		BlockData genesisBlock = BlockHelper.generateGenesisBlock();
 
-		chain = new BlockchainData(genesisBlock, 1);
+		chain = new BlockchainData(genesisBlock, Constants.dificulty);
 
 		chainId = "1";
 	}
 
-	public ShCError getNewMiningJob(String minerAddress, BlockData miningJob) {
+	public ShCError getNewMiningJob(String minerAddress, MiningJobData miningJob) {
 
 		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size() - 1);
 		long nextBlockIndex = lastBlock.getIndex() + 1;
@@ -58,11 +57,11 @@ public class Blockchain implements Serializable {
 
 		chain.getMiningJobs().put(nextBlockCandidate.getBlockDataHash(), nextBlockCandidate);
 
-		miningJob.clone(nextBlockCandidate);
+		miningJob.init(nextBlockCandidate);
 		return ShCError.NO_ERROR;
 	}
 
-	public ShCError submiteMinedBlock(BlockData minedBlock, BlockData newBlock) {
+	public ShCError submiteMinedBlock(MiningJobData minedBlock, BlockData newBlock) {
 
 		try {
 			BlockData nextBlockCandidate = chain.getMiningJobs().get(minedBlock.getBlockDataHash());
@@ -70,11 +69,11 @@ public class Blockchain implements Serializable {
 				return ShCError.MINING_JOB_NOT_FOUND;
 			}
 
-			nextBlockCandidate.setCreationDate(minedBlock.getCreationDate());
+			nextBlockCandidate.setCreationDate(Constants.stringToDateTimeTo(minedBlock.getCreationDate()));
 			nextBlockCandidate.setNonce(minedBlock.getNonce());
 			BlockHelper.calculateBlockHash(nextBlockCandidate);
 
-			if (!nextBlockCandidate.getBlockHash().equals(minedBlock.getBlockHash())) {
+			if (!nextBlockCandidate.getBlockDataHash().equals(minedBlock.getBlockDataHash())) {
 				return ShCError.INCORRECT_BLOCK_HASH;
 			}
 			// TODO block difficulty validation
@@ -87,9 +86,9 @@ public class Blockchain implements Serializable {
 	}
 
 	private ShCError addBlockToChain(BlockData blockCandidate, BlockData newBlock) {
-		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size());
+		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size()-1);
 
-		if (blockCandidate.getIndex() != lastBlock.getIndex()) {
+		if (blockCandidate.getIndex() != (lastBlock.getIndex()+1)) {
 			return ShCError.BLOCK_ALREADY_MINED;
 		}
 
@@ -102,7 +101,7 @@ public class Blockchain implements Serializable {
 
 		pendingTransactionsRemove(blockCandidate.getTransactions());
 
-		newBlock = blockCandidate;
+		newBlock.clone(blockCandidate);
 		return ShCError.NO_ERROR;
 	}
 

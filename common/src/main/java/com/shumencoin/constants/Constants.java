@@ -3,12 +3,9 @@ package com.shumencoin.constants;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.shumencoin.beans_data.BlockchainData;
-
 public class Constants {
 
-	public static String chainId;
-	public static BlockchainData chain;
+	public static long dificulty = 6;
 
 	public static String genesisAddress = "0000000000000000000000000000000000000000";
 	public static String genesisPublicKey = "00000000000000000000000000000000000000000000000000000000000000000";
@@ -21,10 +18,20 @@ public class Constants {
 	public static String faucetAddress = "1423d30500657Ed28a39cb6bE5e0354C9117E69C";	
 
 	public static LocalDateTime generateGenesisCreationDate() {
-		String str = "2018-05-11 00:00";
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-		LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+		String str = "2018-05-11T00:00:00+02:00";
 
-		return dateTime;
+		return stringToDateTimeTo(str);
+	}
+	
+	public static String dateTimeToIsoStr(LocalDateTime dateTime) {
+		if (null != dateTime) {
+			return dateTime.format(DateTimeFormatter.ISO_DATE_TIME);			
+		}
+
+		return "";
+	}
+	
+	public static LocalDateTime stringToDateTimeTo(String dateStr) {
+		return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME);
 	}	
 }
