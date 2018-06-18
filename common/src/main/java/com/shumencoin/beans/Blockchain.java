@@ -69,11 +69,11 @@ public class Blockchain implements Serializable {
 				return ShCError.MINING_JOB_NOT_FOUND;
 			}
 
-			nextBlockCandidate.setCreationDate(Constants.stringToDateTimeTo(minedBlock.getCreationDate()));
+			nextBlockCandidate.setCreationDate(minedBlock.getCreationDate());
 			nextBlockCandidate.setNonce(minedBlock.getNonce());
 			BlockHelper.calculateBlockHash(nextBlockCandidate);
 
-			if (!nextBlockCandidate.getBlockDataHash().equals(minedBlock.getBlockDataHash())) {
+			if (!nextBlockCandidate.getBlockHash().equals(minedBlock.getBlockHash())) {
 				return ShCError.INCORRECT_BLOCK_HASH;
 			}
 			// TODO block difficulty validation

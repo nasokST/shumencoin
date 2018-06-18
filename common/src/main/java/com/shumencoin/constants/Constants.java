@@ -17,10 +17,10 @@ public class Constants {
 	public static String faucetPublicKey = "028d69e411cddf2247720ccd27fea2e68fd290f5dd5fe9c780f7027a1b0746c462";
 	public static String faucetAddress = "1423d30500657Ed28a39cb6bE5e0354C9117E69C";	
 
-	public static LocalDateTime generateGenesisCreationDate() {
+	public static String generateGenesisCreationDate() {
 		String str = "2018-05-11T00:00:00+02:00";
-
-		return stringToDateTimeTo(str);
+		return str;
+		//return stringToDateTimeTo(str);
 	}
 	
 	public static String dateTimeToIsoStr(LocalDateTime dateTime) {

@@ -66,10 +66,10 @@ public class BlockData implements Serializable  {
 	public void setNonce(BigInteger nonce) {
 		this.nonce = nonce;
 	}
-	public LocalDateTime getCreationDate() {
+	public String getCreationDate() {
 		return creationDate;
 	}
-	public void setCreationDate(LocalDateTime creationDate) {
+	public void setCreationDate(String creationDate) {
 		this.creationDate = creationDate;
 	}
 	public List<TransactionData> getTransactions() {
@@ -101,7 +101,7 @@ public class BlockData implements Serializable  {
 	private long dificulty;
 	private String minedBy;
 	private BigInteger nonce;
-	private LocalDateTime creationDate;
+	private String creationDate;
 	private String blockDataHash;
 	private List<TransactionData> transactions;	
 	private String blockHash;

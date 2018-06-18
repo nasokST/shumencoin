@@ -17,7 +17,7 @@ public class MiningJobData implements Serializable {
 		this.setIndex(block.getIndex());
 		this.setDificulty(block.getDificulty());
 		this.setNonce(block.getNonce());
-		this.setCreationDate(Constants.dateTimeToIsoStr(block.getCreationDate()));
+		this.setCreationDate(block.getCreationDate());
 		this.setBlockDataHash(block.getBlockDataHash());
 		this.setBlockHash(block.getBlockHash());
 	}	
