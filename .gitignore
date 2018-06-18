@@ -10,4 +10,5 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+/miner_py/.idea
 

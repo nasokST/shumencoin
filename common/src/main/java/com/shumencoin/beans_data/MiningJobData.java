@@ -2,9 +2,6 @@ package com.shumencoin.beans_data;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
-
-import com.shumencoin.constants.Constants;
 
 public class MiningJobData implements Serializable {
 	

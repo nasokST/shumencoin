@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.kenai.jffi.Array;
 import com.shumencoin.databind.SignatureDeserializer;
 import com.shumencoin.databind.SignatureSerializer;
 
