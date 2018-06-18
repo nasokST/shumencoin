@@ -62,6 +62,7 @@ class Miner(object):
         except requests.exceptions.ConnectionError:
             print("Connection FILURE")
 
+        print("Block not accepted")
         return False
 
     def isDifficultyValid(self, hash: str, difficulty: int):

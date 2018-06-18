@@ -54,6 +54,24 @@ public class BlockHelper {
 
 		return null;
 	}
+	
+	public static boolean validateDificulty(BlockData block) {
+
+		long blockHashDificulty = 0;
+		for (char c : block.getBlockHash().toCharArray()) {
+			if (c != '0') {
+				break;
+			}
+
+			blockHashDificulty++;
+		}
+
+		if (blockHashDificulty < block.getDificulty()) {
+			return false;
+		}
+
+		return true;
+	}
 
 	public static String calculateBlockHash(BlockData block) {
 		String forHashing = block.getBlockDataHash() + block.getCreationDate().toString() + block.getNonce().toString();

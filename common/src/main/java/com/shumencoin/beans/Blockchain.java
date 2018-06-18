@@ -1,6 +1,7 @@
 package com.shumencoin.beans;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,14 +47,12 @@ public class Blockchain implements Serializable {
 		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size() - 1);
 		long nextBlockIndex = lastBlock.getIndex() + 1;
 
-		List<TransactionData> newBlocktransactions = pendingTransactionsClone();
-
-		// TODO miner transaction
+		List<TransactionData> newBlocktransactions = getNextBlockCandidate(nextBlockIndex, minerAddress);
 
 		BlockData nextBlockCandidate = new BlockData(nextBlockIndex, chain.getCurrentDificulty(), minerAddress,
 				newBlocktransactions, lastBlock.getBlockHash());
 
-		nextBlockCandidate.setBlockDataHash(BlockHelper.calculateBlockDataHash(nextBlockCandidate));
+		BlockHelper.calculateBlockDataHash(nextBlockCandidate);
 
 		chain.getMiningJobs().put(nextBlockCandidate.getBlockDataHash(), nextBlockCandidate);
 
@@ -76,7 +75,9 @@ public class Blockchain implements Serializable {
 			if (!nextBlockCandidate.getBlockHash().equals(minedBlock.getBlockHash())) {
 				return ShCError.INCORRECT_BLOCK_HASH;
 			}
-			// TODO block difficulty validation
+			if (!BlockHelper.validateDificulty(nextBlockCandidate)) {
+				return ShCError.INCORRECT_BLOCK_DIFFICULTY;
+			}
 
 			return addBlockToChain(nextBlockCandidate, newBlock);
 		} catch (Exception ex) {
@@ -86,9 +87,9 @@ public class Blockchain implements Serializable {
 	}
 
 	private ShCError addBlockToChain(BlockData blockCandidate, BlockData newBlock) {
-		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size()-1);
+		BlockData lastBlock = chain.getBlocks().get(chain.getBlocks().size() - 1);
 
-		if (blockCandidate.getIndex() != (lastBlock.getIndex()+1)) {
+		if (blockCandidate.getIndex() != (lastBlock.getIndex() + 1)) {
 			return ShCError.BLOCK_ALREADY_MINED;
 		}
 
@@ -110,19 +111,34 @@ public class Blockchain implements Serializable {
 		chain.getPendingTransactions().clear();
 	}
 
-	private List<TransactionData> pendingTransactionsClone() {
+	private List<TransactionData> getNextBlockCandidate(long nextBlockIndex, String minerAddress) {
 
-		List<TransactionData> transactions = new LinkedList<TransactionData>();
+		TransactionData rewardTransaction = TransactionHelper.generateRewardTransaction(nextBlockIndex, minerAddress);
 
+		// TODO get fee for miner reward
+		List<TransactionData> nextBlocktransactions = new LinkedList<TransactionData>();
+
+		BigInteger feeSum = new BigInteger("0");
 		for (TransactionData td : chain.getPendingTransactions()) {
 
 			TransactionData newTd = new TransactionData(td);
-			TransactionHelper.calculateTransactionDataHash(newTd);
 
-			transactions.add(newTd);
+			if (newTd.getFee() >= Constants.minFee && newTd.getFee() <= Constants.maxFee) {
+				feeSum.add(newTd.getValue());				
+			} else {
+				newTd.setTransferSuccessful(false);
+			}
+
+			TransactionHelper.calculateTransactionDataHash(newTd);			
+			nextBlocktransactions.add(newTd);
 		}
 
-		return transactions;
+		rewardTransaction.getValue().add(feeSum);
+		TransactionHelper.calculateTransactionDataHash(rewardTransaction);
+
+		nextBlocktransactions.add(rewardTransaction);
+
+		return nextBlocktransactions;
 	}
 
 	private String chainId;

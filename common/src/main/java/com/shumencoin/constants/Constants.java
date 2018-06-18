@@ -1,11 +1,16 @@
 package com.shumencoin.constants;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Constants {
 
 	public static long dificulty = 6;
+	public static BigInteger blockReward = new BigInteger("50000");
+    public static long minFee = 10;
+    public static long maxFee = 1000000;
+    public static BigInteger maxCoinValue = new BigInteger("10000000000000");
 
 	public static String genesisAddress = "0000000000000000000000000000000000000000";
 	public static String genesisPublicKey = "00000000000000000000000000000000000000000000000000000000000000000";

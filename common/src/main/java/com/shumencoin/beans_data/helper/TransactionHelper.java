@@ -1,6 +1,7 @@
 package com.shumencoin.beans_data.helper;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.constants.Constants;
@@ -38,10 +39,29 @@ public class TransactionHelper {
 		genesisTransaction.setMinedInBlockIndex(0);
 		genesisTransaction.setTransferSuccessful(true);
 
-		genesisTransaction.setTransactionDataHash(calculateTransactionDataHash(genesisTransaction));
+		calculateTransactionDataHash(genesisTransaction);
 
 		return genesisTransaction;
-	}	
+	}
+	
+	public static TransactionData generateRewardTransaction(long nextBlockIndex, String minerAddress) {
+		TransactionData genesisTransaction = new TransactionData();
+
+		genesisTransaction.setFrom(Constants.genesisAddress);
+		genesisTransaction.setTo(minerAddress);
+		genesisTransaction.setValue(Constants.blockReward);
+		genesisTransaction.setFee(0);
+		genesisTransaction.setDateCreated(Constants.dateTimeToIsoStr(LocalDateTime.now()));
+		genesisTransaction.setData("reward transaction");
+		genesisTransaction.setSenderPubKey(Constants.faucetPublicKey);
+		genesisTransaction.setSenderSignature(Constants.genesisSignature);
+		genesisTransaction.setMinedInBlockIndex(nextBlockIndex);
+		genesisTransaction.setTransferSuccessful(true);
+
+		calculateTransactionDataHash(genesisTransaction);
+
+		return genesisTransaction;
+	}		
 	
 //	public String from;
 //	public String to;
