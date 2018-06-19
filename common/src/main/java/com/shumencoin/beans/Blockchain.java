@@ -117,16 +117,26 @@ public class Blockchain implements Serializable {
 	private List<TransactionData> getNextBlockCandidate(long nextBlockIndex, String minerAddress) {
 		TransactionData rewardTransaction = TransactionHelper.generateRewardTransaction(nextBlockIndex, minerAddress);
 
-		// TODO get fee for miner reward
 		List<TransactionData> nextBlocktransactions = new LinkedList<TransactionData>();
 
+		// TODO sort transaction by fee desc
+
 		BigInteger feeSum = new BigInteger("0");
+		long commitedTransaction = 0;
 		for (TransactionData td : chain.getPendingTransactions()) {
+
+			if (commitedTransaction > Constants.maxTransactionToCommit) {
+				break;
+			}
 
 			TransactionData newTd = new TransactionData(td);
 
+			// TODO check transaction`s sender balance
+			// TODO signature validation
+
 			if (newTd.getFee() >= Constants.minFee && newTd.getFee() <= Constants.maxFee) {
-				feeSum.add(newTd.getValue());				
+				feeSum.add(newTd.getValue());
+				commitedTransaction++;
 			} else {
 				newTd.setTransferSuccessful(false);
 			}

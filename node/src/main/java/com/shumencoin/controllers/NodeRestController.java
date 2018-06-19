@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
+import com.shumencoin.beans_data.PeerConnectingInformation;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
+import com.shumencoin.node.NodeApplication;
 
 @RestController
 public class NodeRestController {
@@ -28,6 +30,16 @@ public class NodeRestController {
     @RequestMapping("/node")
     public Node index() {
 	return node;
+    }
+
+    @GetMapping("/node/id")
+    public ResponseEntity<?> getNodeId() {
+    	return new ResponseEntity<Object>(node.getNode().getNodeId(), HttpStatus.OK);
+    }
+
+    @GetMapping("/node/chain-id")
+    public ResponseEntity<?> getChainId() {
+    	return new ResponseEntity<Object>(node.getBlockchain().getChainId(), HttpStatus.OK);
     }
 
     @RequestMapping("/balances")
@@ -93,43 +105,47 @@ public class NodeRestController {
     // ====== PEARS =====
     @RequestMapping("/peers")
     public ResponseEntity<?> getPeers() {
-	return new ResponseEntity<Object>(node.getNode().getPeers(), HttpStatus.OK);
+    	return new ResponseEntity<Object>(node.getNode().getPeers(), HttpStatus.OK);
     }
 
     @PostMapping("/peers/connect")
-    public ResponseEntity<?> getPeersConnect() {
-	// TODO
-	return new ResponseEntity<Object>("getPeersConnect() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> peerAskToConnect(@RequestBody PeerConnectingInformation peerConnectingInformation) {
+    	ShCError error = NodeApplication.peerAskToConnect(node, peerConnectingInformation);
+    	if (ShCError.NO_ERROR == error) {
+    		return new ResponseEntity<Object>(error, HttpStatus.OK);
+    	}
+
+    	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @RequestMapping("/peers/notify-new-block")
-    public ResponseEntity<?> getPeersNotifyForNewBlock() {
-	// TODO
-	return new ResponseEntity<Object>("getPeersNotifyForNewBlock() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    @PostMapping("/peers/notify-new-block")
+    public ResponseEntity<?> getPeersNotifyForNewBlock(@RequestBody BlockData newBlock) {
+    	// TODO 
+    	return new ResponseEntity<Object>("getPeersNotifyForNewBlock() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
 
     // ====== MINING =====
     @GetMapping("/mining/job-request/{minerAddress}")
     public ResponseEntity<?> getMiningAskJob(@PathVariable("minerAddress") String minerAddress) {
 
-	MiningJobData miningJob = new MiningJobData();
-	ShCError error = node.getBlockchain().getNewMiningJob(minerAddress, miningJob);
-	if (ShCError.NO_ERROR == error) {
-	    return new ResponseEntity<Object>(miningJob, HttpStatus.OK);
-	}
+    	MiningJobData miningJob = new MiningJobData();
+    	ShCError error = node.getBlockchain().getNewMiningJob(minerAddress, miningJob); 
+    	if (ShCError.NO_ERROR == error) {
+    		return new ResponseEntity<Object>(miningJob, HttpStatus.OK);
+    	}
 
-	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
+    	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
     }
-
+    
     @PostMapping("/mining/submit-new-block")
     public ResponseEntity<?> getMiningSubmitNewBlock(@RequestBody MiningJobData minedBlock) {
 
-	BlockData newBlock = new BlockData();
-	ShCError error = node.getBlockchain().submitMinedBlock(minedBlock, newBlock);
-	if (ShCError.NO_ERROR == error) {
-	    return new ResponseEntity<Object>(newBlock, HttpStatus.OK);
-	}
+    	BlockData newBlock = new BlockData();
+    	ShCError error = NodeApplication.submitMinedBlock(node, minedBlock, newBlock);
+    	if (ShCError.NO_ERROR == error) {
+    		return new ResponseEntity<Object>(newBlock, HttpStatus.OK);
+    	}
 
-	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
-    }
+    	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
+    }    
 }
