@@ -111,16 +111,39 @@ public class NodeApplication {
 	}
 
 	/**
+	 * This method is call from some another node to tell about new block
 	 * 
 	 * @return
 	 */
-	public static ShCError OnNewBlockNotification(NotificationBaseData notificationBaseData) {
+	public static ShCError OnNewBlockNotification(Node currentNode, NotificationBaseData peerNotificationData) {
+
+		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ShCError error = currentNode.validateNotificationBaseData(peerNotificationData);
+		if (ShCError.NO_ERROR != error) {
+			return error;
+		}
+
+		Integer numberOfSyncronizedBlocks = new Integer(0);
+		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+
+		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
+		if (ShCError.NO_ERROR != error) {
+			return error;
+		}
+
+		if (needOtherPearToBeNotyfied) {
+			
+			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
+			
+			notifyPear(peerNotificationData.getUrl(), notificatePearData);
+		}
+
 		return ShCError.NOT_IMPLEMENTED;
 	}
 
 	/**
 	 * this method is call from miner when he mine new block
-	 *  
+	 * 
 	 * This method trying to submit new block and notify peers on success
 	 * 
 	 * @param minedBloce
@@ -142,13 +165,22 @@ public class NodeApplication {
 		return error;
 	}
 
+	@Async
+	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
+		Integer numberOfSyncronizedBlocks = new Integer(0);
+		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+		return synchronizeeBlocksWithPear(currentNode, otherNodeUrl, numberOfSyncronizedBlocks,
+				needOtherPearToBeNotyfied);
+	}
+
 	/**
 	 * 
 	 * @param currentNode
 	 * @param peerConnectingInformation
 	 */
 	@Async
-	public static void synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
+	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl,
+			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
 
 		try {
 
@@ -159,7 +191,8 @@ public class NodeApplication {
 			List<BlockData> peerBlocks = om.readValue(pearChainJson, new TypeReference<List<BlockData>>() {
 			});
 
-			currentNode.synchronizeeBlocksWithPear(peerBlocks);
+			return currentNode.synchronizeeBlocksWithPear(peerBlocks, numberOfSyncronizedBlocks,
+					needOtherPearToBeNotyfied);
 
 		} catch (ClientProtocolException e) {
 			System.out.println("ERROR synchronization with node: " + otherNodeUrl);
@@ -167,7 +200,7 @@ public class NodeApplication {
 			System.out.println("ERROR synchronization with node: " + otherNodeUrl);
 		}
 
-		return;
+		return ShCError.UNKNOWN;
 	}
 
 	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData) {

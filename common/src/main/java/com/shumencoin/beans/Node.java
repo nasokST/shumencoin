@@ -46,7 +46,7 @@ public class Node implements Serializable {
 		blockchain.initializeChain();
 	}
 
-	public synchronized ShCError validatePearInformation(NotificationBaseData peerConnectingInformation) {
+	public synchronized ShCError validateNotificationBaseData(NotificationBaseData peerConnectingInformation) {
 
 		if (getNode().getNodeId().equals(peerConnectingInformation.getNodeId())) {
 			return ShCError.SELF_CONNECTION;
@@ -56,24 +56,35 @@ public class Node implements Serializable {
 		}
 
 		return ShCError.NO_ERROR;
-	}	
+	}
 
 	public synchronized ShCError peerConnect(NotificationBaseData peerConnectingInformation) {
 
-		ShCError error = validatePearInformation(peerConnectingInformation);
+		ShCError error = validateNotificationBaseData(peerConnectingInformation);
 		if (ShCError.NO_ERROR != error) {
 			return error;
 		}
-		
+
 		// TODO searching and remove for existing peerUrl but with different NodeId
 
 		getNode().getPeers().put(peerConnectingInformation.getNodeId(), peerConnectingInformation.getUrl());
 
 		return ShCError.NO_ERROR;
 	}
-	
-	public synchronized ShCError synchronizeeBlocksWithPear(List<BlockData> peerBlocks) {
+
+	/**
+	 * 
+	 * @param peerBlocks
+	 * @param numberOfSyncronizedBlocks
+	 * @param needOtherPearToBeNotyfied
+	 * @return
+	 */
+	public synchronized ShCError synchronizeeBlocksWithPear(List<BlockData> peerBlocks,
+			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
+		
 		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		numberOfSyncronizedBlocks = 0;
+		needOtherPearToBeNotyfied = false;
 		return ShCError.UNKNOWN;
 	}
 
