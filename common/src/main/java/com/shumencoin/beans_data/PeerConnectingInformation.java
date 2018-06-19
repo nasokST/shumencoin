@@ -13,10 +13,11 @@ public class PeerConnectingInformation implements Serializable{
 		
 	}
 
-	public PeerConnectingInformation(String url, String nodeId, String chainId) {
+	public PeerConnectingInformation(String url, String nodeId, String chainId, boolean connectionCallBack) {
 		this.setUrl(url);
 		this.setNodeId(nodeId);
-		this.setChainId(chainId);		
+		this.setChainId(chainId);
+		this.setConnectionCallBack(connectionCallBack);
 	}
 
 	public String getUrl() {
@@ -37,8 +38,16 @@ public class PeerConnectingInformation implements Serializable{
 	public void setChainId(String chainId) {
 		this.chainId = chainId;
 	}
+	public boolean isConnectionCallBack() {
+		return connectionCallBack;
+	}
+
+	public void setConnectionCallBack(boolean connectionCallBack) {
+		this.connectionCallBack = connectionCallBack;
+	}
+	
 	private String url;
 	private String nodeId;
 	private String chainId;
-
+	private boolean connectionCallBack;
 }

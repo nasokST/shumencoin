@@ -109,9 +109,13 @@ public class NodeRestController {
     }
 
     @PostMapping("/peers/connect")
-    public ResponseEntity<?> getPeersConnect(@RequestBody PeerConnectingInformation peerConnectingInformation) {
-    	// TODO    	
-    	return new ResponseEntity<Object>("getPeersConnect() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> peerAskToConnect(@RequestBody PeerConnectingInformation peerConnectingInformation) {
+    	ShCError error = NodeApplication.peerAskToConnect(node, peerConnectingInformation);
+    	if (ShCError.NO_ERROR == error) {
+    		return new ResponseEntity<Object>(error, HttpStatus.OK);
+    	}
+
+    	return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/peers/notify-new-block")
