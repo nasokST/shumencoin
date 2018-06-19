@@ -23,84 +23,86 @@ import com.shumencoin.node.NodeApplication;
 
 @RestController
 public class NodeRestController {
-	
-	@Autowired
-	Node node;
+
+    @Autowired
+    Node node;
 
     @RequestMapping("/node")
     public Node index() {
-    	return node;
+	return node;
     }
-    
+
     @GetMapping("/node/id")
     public ResponseEntity<?> getNodeId() {
     	return new ResponseEntity<Object>(node.getNode().getNodeId(), HttpStatus.OK);
     }
-    
+
     @GetMapping("/node/chain-id")
     public ResponseEntity<?> getChainId() {
     	return new ResponseEntity<Object>(node.getBlockchain().getChainId(), HttpStatus.OK);
-    }    
-    
+    }
+
     @RequestMapping("/balances")
     public ResponseEntity<?> getConfirmedBalances() {
-    	return new ResponseEntity<Object>("getConfirmedBalances() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
-    }    
-    
+	return new ResponseEntity<Object>("getConfirmedBalances() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    }
+
     @RequestMapping("/blocks")
     public List<BlockData> getAllBlocks() {
-    	return node.getBlockchain().getChain().getBlocks();
+	return node.getBlockchain().getChain().getBlocks();
     }
 
     @RequestMapping("/blocks/{index}")
-    public ResponseEntity<?>  getBlockByIndex(@PathVariable("index") BigInteger index) {
-    	try {
-    		BlockData block = node.getBlockchain().getChain().getBlocks().get(Integer.valueOf(index.toString()));
-        	return new ResponseEntity<Object>(block, HttpStatus.OK);
-    	}
-    	catch(Exception e) {
-        	return new ResponseEntity<Object>("Invalide block: " + index, HttpStatus.BAD_REQUEST);
-    	}
+    public ResponseEntity<?> getBlockByIndex(@PathVariable("index") BigInteger index) {
+	try {
+	    BlockData block = node.getBlockchain().getChain().getBlocks().get(Integer.valueOf(index.toString()));
+	    return new ResponseEntity<Object>(block, HttpStatus.OK);
+	} catch (Exception e) {
+	    return new ResponseEntity<Object>("Invalid block: " + index, HttpStatus.BAD_REQUEST);
+	}
     }
 
-    //  ====== TRANSACTIONS =====
+    // ====== TRANSACTIONS =====
     @RequestMapping("/transactions/pending")
     public List<TransactionData> getAllPendingTransactions() {
-    	return node.getBlockchain().getChain().getPendingTransactions();
+	return node.getBlockchain().getChain().getPendingTransactions();
     }
 
     @RequestMapping("/transactions/confirmed")
-    public ResponseEntity<?> getAllConfirmedTransactions() {
-    	// TODO    	
-    	return new ResponseEntity<Object>("getAllConfirmedTransactions() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    public List<TransactionData> getAllConfirmedTransactions() {
+	return node.getBlockchain().listConfirmedTransaction();
     }
 
     @RequestMapping("/transactions/{transactionHash}")
-    public ResponseEntity<?> getTransactionByHash() {
-    	// TODO    	
-    	return new ResponseEntity<Object>("getTransactionByHash() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
-    }
-    
-    @RequestMapping("/transactions/send")
-    public ResponseEntity<?> getTransactionSend() {
-    	// TODO    	
-    	return new ResponseEntity<Object>("getTransactionSend() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> getTransactionByHash(@PathVariable("transactionHash") String hash) {
+	try {
+	    TransactionData transaction = node.getBlockchain().getTransactionByHash(hash);
+	    return new ResponseEntity<Object>(transaction, HttpStatus.OK);
+	} catch (Exception e) {
+	    return new ResponseEntity<Object>("Invalid transaction hash: " + hash, HttpStatus.BAD_REQUEST);
+	}
     }
 
-    // 	====== ADDRESS =====
+    @RequestMapping("/transactions/send")
+    public ResponseEntity<?> getTransactionSend() {
+	// TODO
+	return new ResponseEntity<Object>("getTransactionSend() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+    }
+
+    // ====== ADDRESS =====
     @RequestMapping("/address/{address}/transactions")
     public ResponseEntity<?> addressGetTransactions() {
-    	// TODO    	
-    	return new ResponseEntity<Object>("addressGetTransactions() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+	// TODO
+	return new ResponseEntity<Object>("addressGetTransactions() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping("/address/{address}/balance")
     public ResponseEntity<?> addressGetBalance() {
-    	// TODO    	
-    	return new ResponseEntity<Object>("addressGetBalance() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+	// TODO
+	return new ResponseEntity<Object>("addressGetBalance() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
 
-    // ======   PEARS =====
+    // ====== PEARS =====
     @RequestMapping("/peers")
     public ResponseEntity<?> getPeers() {
     	return new ResponseEntity<Object>(node.getNode().getPeers(), HttpStatus.OK);
@@ -118,7 +120,7 @@ public class NodeRestController {
     	return new ResponseEntity<Object>("getPeersNotifyForNewBlock() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
 
-    // ======   MINING =====
+    // ====== MINING =====
     @GetMapping("/mining/job-request/{minerAddress}")
     public ResponseEntity<?> getMiningAskJob(@PathVariable("minerAddress") String minerAddress) {
 

@@ -2,6 +2,7 @@ package com.shumencoin.beans;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +22,9 @@ public class Blockchain implements Serializable {
 	 */
 	private static final long serialVersionUID = 2182266894521524361L;
 
+	private String chainId;
+	private BlockchainData chain;
+	
 	public BlockchainData getChain() {
 		return chain;
 	}
@@ -60,7 +64,7 @@ public class Blockchain implements Serializable {
 		return ShCError.NO_ERROR;
 	}
 
-	public ShCError submiteMinedBlock(MiningJobData minedBlock, BlockData newBlock) {
+	public ShCError submitMinedBlock(MiningJobData minedBlock, BlockData newBlock) {
 
 		try {
 			BlockData nextBlockCandidate = chain.getMiningJobs().get(minedBlock.getBlockDataHash());
@@ -107,12 +111,10 @@ public class Blockchain implements Serializable {
 	}
 
 	private void pendingTransactionsRemove(List<TransactionData> toRemove) {
-		// TODO mined Transactions Remove ONLY
-		chain.getPendingTransactions().clear();
+		chain.getPendingTransactions().removeAll(toRemove); 
 	}
 
 	private List<TransactionData> getNextBlockCandidate(long nextBlockIndex, String minerAddress) {
-
 		TransactionData rewardTransaction = TransactionHelper.generateRewardTransaction(nextBlockIndex, minerAddress);
 
 		List<TransactionData> nextBlocktransactions = new LinkedList<TransactionData>();
@@ -150,7 +152,23 @@ public class Blockchain implements Serializable {
 
 		return nextBlocktransactions;
 	}
+	
+	public List<TransactionData> listConfirmedTransaction() {
+	    List<TransactionData> confirmedTransactions = new ArrayList<TransactionData>();
+	    for(BlockData block : chain.getBlocks()) {
+		confirmedTransactions.addAll(block.getTransactions());
+	    }
+	    return confirmedTransactions;
+	}
 
-	private String chainId;
-	private BlockchainData chain;
+	public TransactionData getTransactionByHash(String hash) throws Exception {
+	    for(BlockData block : chain.getBlocks()) {
+		for(TransactionData transaction : block.getTransactions()) {
+		    if(hash.equals(transaction.getTransactionDataHash())) {
+			return transaction;
+		    }
+		}
+	    }
+	    throw new Exception(hash);
+	}
 }

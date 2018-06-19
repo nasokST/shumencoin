@@ -90,7 +90,7 @@ public class NodeApplication {
 
 		//notifyPear("http://127.0.0.1:8080", newBlock);
 
-		ShCError error = node.getBlockchain().submiteMinedBlock(minedBlock, newBlock);
+		ShCError error = node.getBlockchain().submitMinedBlock(minedBlock, newBlock);
 
 		if (ShCError.NO_ERROR == error) {
 			newBlockNotification(node, newBlock);
