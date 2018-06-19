@@ -28,20 +28,9 @@ $( document ).ready(function() {
 	  },
 	  beforeSend: setHeader
 	});
-  
-	function setHeader(xhr) {
-		xhr.setRequestHeader('Origin', 'http://localhost:8080/');
-	}
 	
 	function fillInBlocksTable(data) {
-		$.each(data, function(index, element) { 
-			console.log(index);
-			console.log(element);
-			console.log(element.index);
-			console.log(element.dificulty);
-			console.log(element.minedBy);
-			console.log(element.nonce);
-			
+		$.each(data, function(index, element) { 		
 			var html = "<tr>"
 						+ "<td>" + element.index +"</td>"
 						+ "<td>" + element.dificulty +"</td>"
@@ -63,6 +52,55 @@ $( document ).ready(function() {
 				"paginate": false,
 				"info": false,});
 	}
+	
+	$.ajax({
+		url: 'http://localhost:8080/transactions/confirmed',
+		type: 'GET',
+		dataType: 'json',
+		success: function(data) { 
+			fillInTransactionTable(data,"confirmed-transactions-table");
+		},
+		beforeSend: setHeader
+	});
+	
+	$.ajax({
+		url: 'http://localhost:8080/transactions/pending',
+		type: 'GET',
+		dataType: 'json',
+		success: function(data) { 
+			fillInTransactionTable(data,"pending-transactions-table");
+		},
+		beforeSend: setHeader
+	});
+	
+	function fillInTransactionTable(data, table) {
+		$.each(data, function(index, element) {
+			var html = "<tr>"
+			+ "<td>" + element.from + "</td>"
+			+ "<td>" + element.to + "</td>"
+			+ "<td>" + element.value + "</td>"
+			+ "<td>" + element.fee + "</td>"
+			+ "<td>" + element.dateCreated + "</td>"
+			+ "<td>" + element.data + "</td>"
+			+ "<td>" + element.senderPubKey + "</td>"
+			+ "<td>" + element.transactionDataHash+ "</td>"
+			+ "<td>" + element.minedInBlockIndex + "</td>"
+			+ "<td>" + (element.transferSuccessful?"true":"false")+ "</td>";
+			$( "#" + table + "-body" ).append(html);
+		});	
+		$('#' + table).DataTable({
+                "fixedHeader": true,
+                "responsive": true,
+				"lengthChange": false,               
+				"searching": false,
+				"paginate": false,
+				"info": false,});
+	}
+	
+	function setHeader(xhr) {
+		xhr.setRequestHeader('Origin', 'http://localhost:8080/');
+	}
+	
 });
 
 </script>
@@ -100,11 +138,49 @@ $( document ).ready(function() {
         </div>
         <div id="sectionB" class="tab-pane fade">
             <h3>Confirmed Transactions</h3>
-            <p>TODO This will be filled with all confirmed transactions</p>
+			<div class="container-fluid">
+				<table id="confirmed-transactions-table" class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>From</th>
+							<th>To</th>
+							<th>Value</th>
+							<th>Fee</th>
+							<th>Date Created</th>
+							<th>Data</th>
+							<th>SenderPubKey</th>
+							<th>TransactionDataHash</th>
+							<th>MinedInBlockIndex</th>
+							<th>Transfer Successfull</th>
+						</tr>
+					</thead>
+					<tbody id="confirmed-transactions-table-body">
+					</tbody>
+				</table>
+			</div>
         </div>
         <div id="sectionC" class="tab-pane fade">
             <h3>Pending Transactions</h3>
-            <p>TODO This will be filled with all pending transactions</p>
+			<div class="container-fluid">
+				<table id="pending-transactions-table" class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>From</th>
+							<th>To</th>
+							<th>Value</th>
+							<th>Fee</th>
+							<th>Date Created</th>
+							<th>Data</th>
+							<th>SenderPubKey</th>
+							<th>TransactionDataHash</th>
+							<th>MinedInBlockIndex</th>
+							<th>Transfer Successfull</th>
+						</tr>
+					</thead>
+					<tbody id="pending-transactions-table-body">
+					</tbody>
+				</table>
+			</div>
         </div>
     </div>
 </div>
