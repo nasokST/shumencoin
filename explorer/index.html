@@ -45,13 +45,13 @@ $( document ).ready(function() {
 			var html = "<tr>"
 						+ "<td>" + element.index +"</td>"
 						+ "<td>" + element.dificulty +"</td>"
-						+ "<td>" + element.minedBy +"</td>"
+						+ "<td style='width:40px'>" + element.minedBy +"</td>"
 						+ "<td>" + element.nonce +"</td>"
 						+ "<td>" + element.creationDate +"</td>"
-						+ "<td>" + element.blockDataHash +"</td>"
-						+ "<td>" + element.blockHash +"</td>"
-						+ "<td>" + element.prevBlockHash +"</td>"
-						+ "<td>" + JSON.stringify(element.transactions) +"</td>"
+						+ "<td style='max-width:150px; white-space:pre-wrap; word-wrap:break-word;'>" + element.blockDataHash +"</td>"
+						+ "<td style='max-width:150px; white-space:pre-wrap; word-wrap:break-word;'>" + element.blockHash +"</td>"
+						+ "<td style='max-width:150px; white-space:pre-wrap; word-wrap:break-word;'>" + element.prevBlockHash +"</td>"
+						+ "<td style='max-width:100px; white-space:pre-wrap; word-wrap:break-word;'>" + JSON.stringify(element.transactions) +"</td>"
 					+ "</tr>";
 			$( "#block-table-body" ).append(html);
 		});
@@ -62,8 +62,6 @@ $( document ).ready(function() {
 				"searching": false,
 				"paginate": false,
 				"info": false,});
-		
-		$('block-table').attr('width', 500);
 	}
 });
 
