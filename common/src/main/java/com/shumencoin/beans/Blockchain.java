@@ -111,7 +111,6 @@ public class Blockchain implements Serializable {
 	}
 
 	private void pendingTransactionsRemove(List<TransactionData> toRemove) {
-		// TODO mined Transactions Remove ONLY
 		chain.getPendingTransactions().removeAll(toRemove); 
 	}
 
