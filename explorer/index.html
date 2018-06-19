@@ -19,17 +19,47 @@
 <script type="application/javascript">
 $( document ).ready(function() {
 
-  $.ajax({
-	  url: 'http://localhost:8080/blocks',
-	  type: 'GET',
-	  dataType: 'json',
-	  success: function(data) { 
-		fillInBlocksTable(data);
-	  },
-	  beforeSend: setHeader
-	});
-	
+	(function(){
+	   var f = function() {
+	   $.ajax({
+		  url: 'http://localhost:8080/blocks',
+		  type: 'GET',
+		  dataType: 'json',
+		  success: function(data) { 
+			fillInBlocksTable(data);
+		  },
+		  beforeSend: setHeader
+		});
+		
+		$.ajax({
+			url: 'http://localhost:8080/transactions/confirmed',
+			type: 'GET',
+			dataType: 'json',
+			success: function(data) { 
+				fillInTransactionTable(data,"confirmed-transactions-table");
+			},
+			beforeSend: setHeader
+		});
+		
+		$.ajax({
+			url: 'http://localhost:8080/transactions/pending',
+			type: 'GET',
+			dataType: 'json',
+			success: function(data) { 
+				fillInTransactionTable(data,"pending-transactions-table");
+			},
+			beforeSend: setHeader
+		});
+
+		
+	   };
+	   window.setInterval(f, 10000);
+	   f();
+	})();
+
+  	
 	function fillInBlocksTable(data) {
+		$('#block-table').DataTable().clear().destroy();
 		$.each(data, function(index, element) { 		
 			var html = "<tr>"
 						+ "<td>" + element.index +"</td>"
@@ -52,28 +82,9 @@ $( document ).ready(function() {
 				"paginate": false,
 				"info": false,});
 	}
-	
-	$.ajax({
-		url: 'http://localhost:8080/transactions/confirmed',
-		type: 'GET',
-		dataType: 'json',
-		success: function(data) { 
-			fillInTransactionTable(data,"confirmed-transactions-table");
-		},
-		beforeSend: setHeader
-	});
-	
-	$.ajax({
-		url: 'http://localhost:8080/transactions/pending',
-		type: 'GET',
-		dataType: 'json',
-		success: function(data) { 
-			fillInTransactionTable(data,"pending-transactions-table");
-		},
-		beforeSend: setHeader
-	});
-	
+		
 	function fillInTransactionTable(data, table) {
+		$('#' + table).DataTable().clear().destroy();	
 		$.each(data, function(index, element) {
 			var html = "<tr>"
 			+ "<td>" + element.from + "</td>"
