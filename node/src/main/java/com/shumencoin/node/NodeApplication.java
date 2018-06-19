@@ -87,26 +87,25 @@ public class NodeApplication {
 	 * @return
 	 */
 	public static ShCError submitMinedBlock(Node node, MiningJobData minedBlock, BlockData newBlock) {
-		
+
 		//notifyPear("http://127.0.0.1:8080", newBlock);
-		
+
 		ShCError error = node.getBlockchain().submiteMinedBlock(minedBlock, newBlock);
-		
+
 		if (ShCError.NO_ERROR == error) {
 			newBlockNotification(node, newBlock);
 		}
 
 		return error;
 	}
-	
-	@Async
+
 	private static void newBlockNotification(Node node, BlockData newBlock) {
 		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
 			notifyPear(peer.getValue(), newBlock);
 			// TODO may be implements peer new block confirmation 
 		}		
 	}
-	
+
 	/**
 	 * 
 	 * 
@@ -124,13 +123,18 @@ public class NodeApplication {
 			e.printStackTrace();
 			return;
 		}
-		
+
+		postRequest(peerHost + "/peers/notify-new-block", newBlockJson);
+	}
+	
+	private static void postRequest(String toUrl, String jsonData) {
+
 	    CloseableHttpClient client = HttpClients.createDefault();
-	    HttpPost httpPost = new HttpPost(peerHost + "/peers/notify-new-block");
-	 
+	    HttpPost httpPost = new HttpPost(toUrl);
+
 	    StringEntity entity;
 		try {
-			entity = new StringEntity(newBlockJson);
+			entity = new StringEntity(jsonData);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return;
@@ -139,39 +143,60 @@ public class NodeApplication {
 	    httpPost.setEntity(entity);
 	    httpPost.setHeader("Accept", "application/json");
 	    httpPost.setHeader("Content-type", "application/json");
-	 
+
 	    try {
 			CloseableHttpResponse response = client.execute(httpPost);
-			System.out.println("POST: " + peerHost + "/notify-new-block");
+			System.out.println("POST: " + toUrl);
 			System.out.println("response: " + response.getStatusLine().getStatusCode());
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	    try {
 			client.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}	
-
-//    @Bean
-//    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-//        return args -> {
+	}
+	
+	private static void getRequest() {
+//		CloseableHttpClient httpclient = HttpClients.createDefault();
+//		HttpGet httpGet = new HttpGet("http://targethost/homepage");
+//		CloseableHttpResponse response1 = httpclient.execute(httpGet);
+//		// The underlying HTTP connection is still held by the response object
+//		// to allow the response content to be streamed directly from the network socket.
+//		// In order to ensure correct deallocation of system resources
+//		// the user MUST call CloseableHttpResponse#close() from a finally clause.
+//		// Please note that if response content is not fully consumed the underlying
+//		// connection cannot be safely re-used and will be shut down and discarded
+//		// by the connection manager. 
+//		try {
+//		    System.out.println(response1.getStatusLine());
+//		    HttpEntity entity1 = response1.getEntity();
+//		    // do something useful with the response body
+//		    // and ensure it is fully consumed
+//		    EntityUtils.consume(entity1);
+//		} finally {
+//		    response1.close();
+//		}
 //
-//            System.out.println("Let's inspect the beans provided by Spring Boot:");
+//		HttpPost httpPost = new HttpPost("http://targethost/login");
+//		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+//		nvps.add(new BasicNameValuePair("username", "vip"));
+//		nvps.add(new BasicNameValuePair("password", "secret"));
+//		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+//		CloseableHttpResponse response2 = httpclient.execute(httpPost);
 //
-//            String[] beanNames = ctx.getBeanDefinitionNames();
-//            Arrays.sort(beanNames);
-//            for (String beanName : beanNames) {
-//                System.out.println(beanName);
-//            }
-//
-//        };
-//    }	
+//		try {
+//		    System.out.println(response2.getStatusLine());
+//		    HttpEntity entity2 = response2.getEntity();
+//		    // do something useful with the response body
+//		    // and ensure it is fully consumed
+//		    EntityUtils.consume(entity2);
+//		} finally {
+//		    response2.close();
+//		}
+	}
 }

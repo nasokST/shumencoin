@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
+import com.shumencoin.beans_data.PeerConnectingInformation;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
 import com.shumencoin.node.NodeApplication;
@@ -30,6 +31,16 @@ public class NodeRestController {
     public Node index() {
     	return node;
     }
+    
+    @GetMapping("/node/id")
+    public ResponseEntity<?> getNodeId() {
+    	return new ResponseEntity<Object>(node.getNode().getNodeId(), HttpStatus.OK);
+    }
+    
+    @GetMapping("/node/chain-id")
+    public ResponseEntity<?> getChainId() {
+    	return new ResponseEntity<Object>(node.getBlockchain().getChainId(), HttpStatus.OK);
+    }    
     
     @RequestMapping("/balances")
     public ResponseEntity<?> getConfirmedBalances() {
@@ -96,7 +107,7 @@ public class NodeRestController {
     }
 
     @PostMapping("/peers/connect")
-    public ResponseEntity<?> getPeersConnect() {
+    public ResponseEntity<?> getPeersConnect(@RequestBody PeerConnectingInformation peerConnectingInformation) {
     	// TODO    	
     	return new ResponseEntity<Object>("getPeersConnect() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
