@@ -1,27 +1,46 @@
 package com.shumencoin.node;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Security;
-import java.util.Arrays;
+import java.util.Map;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shumencoin.beans.Node;
 //import com.shumencoin.convertion.Converter;
 //import com.shumencoin.crypto.Crypto;
+import com.shumencoin.beans_data.BlockData;
+import com.shumencoin.beans_data.MiningJobData;
+import com.shumencoin.crypto.Crypto;
+import com.shumencoin.errors.ShCError;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.shumencoin.*" })
+@EnableAsync
 public class NodeApplication {
 	
 	static int port = 8080;
@@ -59,6 +78,87 @@ public class NodeApplication {
 
 		return node;
 	}
+	
+	/**
+	 * tying to submit new block and notify peers on success
+	 * 
+	 * @param minedBloce
+	 * @param newBlock
+	 * @return
+	 */
+	public static ShCError submitMinedBlock(Node node, MiningJobData minedBlock, BlockData newBlock) {
+		
+		//notifyPear("http://127.0.0.1:8080", newBlock);
+		
+		ShCError error = node.getBlockchain().submiteMinedBlock(minedBlock, newBlock);
+		
+		if (ShCError.NO_ERROR == error) {
+			newBlockNotification(node, newBlock);
+		}
+
+		return error;
+	}
+	
+	@Async
+	private static void newBlockNotification(Node node, BlockData newBlock) {
+		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
+			notifyPear(peer.getValue(), newBlock);
+			// TODO may be implements peer new block confirmation 
+		}		
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param peerHost
+	 * @param newBlock
+	 */
+	@Async
+	private static void notifyPear(String peerHost, BlockData newBlock) {
+
+		ObjectMapper ow = new ObjectMapper();
+		String newBlockJson = null;
+		try {
+			newBlockJson = ow.writeValueAsString(newBlock);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	    CloseableHttpClient client = HttpClients.createDefault();
+	    HttpPost httpPost = new HttpPost(peerHost + "/peers/notify-new-block");
+	 
+	    StringEntity entity;
+		try {
+			entity = new StringEntity(newBlockJson);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return;
+		}
+
+	    httpPost.setEntity(entity);
+	    httpPost.setHeader("Accept", "application/json");
+	    httpPost.setHeader("Content-type", "application/json");
+	 
+	    try {
+			CloseableHttpResponse response = client.execute(httpPost);
+			System.out.println("POST: " + peerHost + "/notify-new-block");
+			System.out.println("response: " + response.getStatusLine().getStatusCode());
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	    try {
+			client.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
 
 //    @Bean
 //    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {

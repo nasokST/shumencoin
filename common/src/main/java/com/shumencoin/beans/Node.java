@@ -6,10 +6,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.shumencoin.beans_data.BlockData;
+import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.NodeData;
 import com.shumencoin.beans_data.URL;
+import com.shumencoin.beans_data.helper.BlockHelper;
 import com.shumencoin.convertion.Converter;
 import com.shumencoin.crypto.Crypto;
+import com.shumencoin.errors.ShCError;
 
 public class Node implements Serializable{
 
@@ -47,8 +51,7 @@ public class Node implements Serializable{
 		String rawKey = LocalDateTime.now().toString();
 
 		byte[] randomeKey = new byte[32];
-		SecureRandom secureRandom = new SecureRandom();
-		secureRandom.nextBytes(randomeKey);
+		Crypto.generatePublicKey(randomeKey);
 
 		rawKey += Converter.byteArrayToHexString(randomeKey);
 

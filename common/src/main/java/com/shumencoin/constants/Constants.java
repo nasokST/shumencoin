@@ -10,6 +10,7 @@ public class Constants {
 	public static BigInteger blockReward = new BigInteger("50000");
     public static long minFee = 10;
     public static long maxFee = 1000000;
+    public static long maxTransactionToCommit = 3;
     public static BigInteger maxCoinValue = new BigInteger("10000000000000");
 
 	public static String genesisAddress = "0000000000000000000000000000000000000000";

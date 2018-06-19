@@ -18,6 +18,7 @@ import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
+import com.shumencoin.node.NodeApplication;
 
 @RestController
 public class NodeRestController {
@@ -100,8 +101,8 @@ public class NodeRestController {
     	return new ResponseEntity<Object>("getPeersConnect() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
 
-    @RequestMapping("/peers/notify-new-block")
-    public ResponseEntity<?> getPeersNotifyForNewBlock() {
+    @PostMapping("/peers/notify-new-block")
+    public ResponseEntity<?> getPeersNotifyForNewBlock(@RequestBody BlockData newBlock) {
     	// TODO 
     	return new ResponseEntity<Object>("getPeersNotifyForNewBlock() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
@@ -123,7 +124,7 @@ public class NodeRestController {
     public ResponseEntity<?> getMiningSubmitNewBlock(@RequestBody MiningJobData minedBlock) {
 
     	BlockData newBlock = new BlockData();
-    	ShCError error = node.getBlockchain().submiteMinedBlock(minedBlock, newBlock);
+    	ShCError error = NodeApplication.submitMinedBlock(node, minedBlock, newBlock);
     	if (ShCError.NO_ERROR == error) {
     		return new ResponseEntity<Object>(newBlock, HttpStatus.OK);
     	}
