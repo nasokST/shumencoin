@@ -96,6 +96,9 @@ class Miner(object):
             targetBlock.blockHash = binascii.hexlify(hash).decode('utf-8')
             #print("BLOCKHASH: : ", targetBlock.blockHash)
 
+            if targetBlock.nonce == 0:
+                break
+
         print("BLOCK Mined: ", targetBlock.blockHash)
 
         return targetBlock
@@ -123,4 +126,3 @@ address = args.address
 
 miner = Miner(port, address)
 miner.startMmining()
-

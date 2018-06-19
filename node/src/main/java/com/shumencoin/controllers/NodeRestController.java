@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
-import com.shumencoin.beans_data.PeerConnectingInformation;
+import com.shumencoin.beans_data.NotificationBaseData;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
 import com.shumencoin.node.NodeApplication;
@@ -109,8 +109,8 @@ public class NodeRestController {
     }
 
     @PostMapping("/peers/connect")
-    public ResponseEntity<?> peerAskToConnect(@RequestBody PeerConnectingInformation peerConnectingInformation) {
-    	ShCError error = NodeApplication.peerAskToConnect(node, peerConnectingInformation);
+    public ResponseEntity<?> peerAskToConnect(@RequestBody NotificationBaseData peerConnectingInformation) {
+    	ShCError error = NodeApplication.OnPeerAskToConnect(node, peerConnectingInformation);
     	if (ShCError.NO_ERROR == error) {
     		return new ResponseEntity<Object>(error, HttpStatus.OK);
     	}
@@ -119,7 +119,7 @@ public class NodeRestController {
     }
 
     @PostMapping("/peers/notify-new-block")
-    public ResponseEntity<?> getPeersNotifyForNewBlock(@RequestBody BlockData newBlock) {
+    public ResponseEntity<?> getPeersNotifyForNewBlock(@RequestBody NotificationBaseData notificationData) {
     	// TODO 
     	return new ResponseEntity<Object>("getPeersNotifyForNewBlock() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
     }
@@ -141,7 +141,7 @@ public class NodeRestController {
     public ResponseEntity<?> getMiningSubmitNewBlock(@RequestBody MiningJobData minedBlock) {
 
     	BlockData newBlock = new BlockData();
-    	ShCError error = NodeApplication.submitMinedBlock(node, minedBlock, newBlock);
+    	ShCError error = NodeApplication.OnSubmitMinedBlock(node, minedBlock, newBlock);
     	if (ShCError.NO_ERROR == error) {
     		return new ResponseEntity<Object>(newBlock, HttpStatus.OK);
     	}
