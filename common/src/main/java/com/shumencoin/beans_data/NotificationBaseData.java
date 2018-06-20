@@ -10,6 +10,9 @@ public class NotificationBaseData implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -5822068122896169766L;
+	
+	public NotificationBaseData() {
+	}	
 
 	public NotificationBaseData(Node node, boolean notificationCallBack) {
 		this.setChainId(node.getBlockchain().getChainId());

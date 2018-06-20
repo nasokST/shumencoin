@@ -71,6 +71,17 @@ public class BlockHelper {
 		return true;
 	}
 
+	public static boolean validateBlock(BlockData block) {
+
+		String hash = calculateBlockHash(block);
+
+		if (hash.equals(block.getBlockHash())) {
+			return true;
+		}
+
+		return false;
+	}	
+
 	public static String calculateBlockHash(BlockData block) {
 		String forHashing = block.getBlockDataHash() + block.getCreationDate().toString() + block.getNonce().toString();
 

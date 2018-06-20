@@ -39,7 +39,27 @@ public class BlockData implements Serializable  {
 		this.setTransactions(other.getTransactions());
 		this.setBlockHash(other.getBlockHash());
 		this.setPrevBlockHash(other.prevBlockHash);
-	}	
+	}
+	
+	public boolean equals(BlockData other) {
+		return this.getBlockHash().equals(other.getBlockHash());
+		
+//		return this.getIndex() == other.getIndex() 
+//				&&
+//				this.getDificulty() == other.getDificulty()
+//				&&
+//				this.getMinedBy().equals(other.getMinedBy())
+//				&&
+//				this.getNonce().equals(other.getNonce())
+//				&&
+//				this.getCreationDate().equals(other.getCreationDate())
+//				&&
+//				this.getBlockDataHash().equals(other.getBlockDataHash())
+//				&&
+//				this.getBlockHash().equals(other.getBlockHash())
+//				&&
+//				this.getPrevBlockHash().equals(other.prevBlockHash);		
+	}
 
 	public long getIndex() {
 		return index;

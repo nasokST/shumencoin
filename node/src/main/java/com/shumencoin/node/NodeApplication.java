@@ -6,6 +6,7 @@ import java.security.Security;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.language.bm.PhoneticEngine;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -104,7 +105,10 @@ public class NodeApplication {
 				return ShCError.UNKNOWN;
 			}
 
-			postRequest(peerConnectingInformation.getUrl() + "/peers/connect", currentNodeConnectingInformationJson);
+			error = postRequest(peerConnectingInformation.getUrl() + "/peers/connect", currentNodeConnectingInformationJson);
+			if (ShCError.NO_ERROR != error) {
+				return error;
+			}			
 		}
 
 		return error;
@@ -203,6 +207,7 @@ public class NodeApplication {
 		return ShCError.UNKNOWN;
 	}
 
+	@Async
 	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData) {
 		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
 			notifyPear(peer.getValue(), notificationBaseData);
@@ -231,7 +236,7 @@ public class NodeApplication {
 		postRequest(peerHost + "/peers/notify-new-block", newBlockJson);
 	}
 
-	private static void postRequest(String toUrl, String jsonData) {
+	private static ShCError postRequest(String toUrl, String jsonData) {
 
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(toUrl);
@@ -240,8 +245,7 @@ public class NodeApplication {
 		try {
 			entity = new StringEntity(jsonData);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return;
+			return ShCError.CANNNOT_CONNECT_TO_PEER;
 		}
 
 		httpPost.setEntity(entity);
@@ -253,16 +257,18 @@ public class NodeApplication {
 			System.out.println("POST: " + toUrl);
 			System.out.println("response: " + response.getStatusLine().getStatusCode());
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			return ShCError.CANNNOT_CONNECT_TO_PEER;
 		} catch (IOException e) {
-			e.printStackTrace();
+			return ShCError.CANNNOT_CONNECT_TO_PEER;
 		}
 
 		try {
 			client.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			return ShCError.CANNNOT_CONNECT_TO_PEER;
 		}
+
+		return ShCError.NO_ERROR;
 	}
 
 	private static String getRequest(String toUrl) throws ClientProtocolException, IOException {

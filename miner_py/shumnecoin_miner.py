@@ -2,7 +2,6 @@ import requests
 import datetime
 import hashlib
 import binascii
-import json
 
 class Block(object):
     index = 0
@@ -50,6 +49,7 @@ class Miner(object):
 
     def submitJob(self, minedBlock):
 
+        not_accepted_reason = "UNKNOWN"
         try:
             data = vars(minedBlock)
             params = {}
@@ -59,10 +59,13 @@ class Miner(object):
             if response.status_code == 200:
                 return True
 
-        except requests.exceptions.ConnectionError:
-            print("Connection FILURE")
+            not_accepted_reason = response.content.decode('utf-8')
 
-        print("Block not accepted")
+        except requests.exceptions.ConnectionError:
+            not_accepted_reason = "Connection FILURE"
+            print(not_accepted_reason)
+
+        print("Block not accepted: " + not_accepted_reason)
         return False
 
     def isDifficultyValid(self, hash: str, difficulty: int):
@@ -94,7 +97,7 @@ class Miner(object):
             toHash = targetBlock.blockDataHash + targetBlock.creationDate + str(targetBlock.nonce)
             hash = hashlib.sha256(toHash.encode("utf8")).digest()
             targetBlock.blockHash = binascii.hexlify(hash).decode('utf-8')
-            #print("BLOCKHASH: : ", targetBlock.blockHash)
+            print(targetBlock.blockHash, end='\r')
 
             if targetBlock.nonce == 0:
                 break
@@ -126,3 +129,5 @@ address = args.address
 
 miner = Miner(port, address)
 miner.startMmining()
+
+
