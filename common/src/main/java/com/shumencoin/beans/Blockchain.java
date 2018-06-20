@@ -134,7 +134,7 @@ public class Blockchain implements Serializable {
 			// TODO check transaction`s sender balance
 			// TODO signature validation
 
-			if (newTd.getFee() >= Constants.minFee && newTd.getFee() <= Constants.maxFee) {
+			if (TransactionHelper.isValidTransactionData(newTd)) {
 				feeSum.add(newTd.getValue());
 				commitedTransaction++;
 			} else {

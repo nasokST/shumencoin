@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.constants.Constants;
 import com.shumencoin.crypto.Crypto;
+import com.shumencoin.errors.ShCError;
 
 public class TransactionHelper {
 	
@@ -43,7 +44,7 @@ public class TransactionHelper {
 
 		return genesisTransaction;
 	}
-	
+
 	public static TransactionData generateRewardTransaction(long nextBlockIndex, String minerAddress) {
 		TransactionData genesisTransaction = new TransactionData();
 
@@ -53,7 +54,7 @@ public class TransactionHelper {
 		genesisTransaction.setFee(0);
 		genesisTransaction.setDateCreated(Constants.dateTimeToIsoStr(LocalDateTime.now()));
 		genesisTransaction.setData("reward transaction");
-		genesisTransaction.setSenderPubKey(Constants.faucetPublicKey);
+		genesisTransaction.setSenderPubKey(Constants.genesisPublicKey);
 		genesisTransaction.setSenderSignature(Constants.genesisSignature);
 		genesisTransaction.setMinedInBlockIndex(nextBlockIndex);
 		genesisTransaction.setTransferSuccessful(true);
@@ -61,7 +62,36 @@ public class TransactionHelper {
 		calculateTransactionDataHash(genesisTransaction);
 
 		return genesisTransaction;
-	}		
+	}
+	
+	public static ShCError sign(TransactionData transaction) {
+		// TODO sign transaction
+		return ShCError.NOT_IMPLEMENTED; 
+	}
+
+	public static ShCError validateSignatute(TransactionData transaction) {
+
+		if (transaction.getSenderPubKey().equals(Constants.genesisAddress)) {
+			return ShCError.NO_ERROR;
+		}
+
+		// TODO sign transaction
+		return ShCError.NOT_IMPLEMENTED; 
+	}	
+
+	public static boolean isValidTransactionData(TransactionData transaction) {
+		
+		if (transaction.getFee() < Constants.minFee || transaction.getFee() > Constants.maxFee) {
+			return false;
+		}
+		if (transaction.getValue().min(new BigInteger("0")) == transaction.getValue()) {
+			return false;
+		}
+
+		// TODO more data validation
+		
+		return true;
+	}
 	
 //	public String from;
 //	public String to;

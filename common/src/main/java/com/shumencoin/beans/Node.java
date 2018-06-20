@@ -88,9 +88,9 @@ public class Node implements Serializable {
 	 * @return
 	 */
 	public synchronized ShCError synchronizeeBlocksWithPear(List<BlockData> peerBlocks,
-			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
+			AtomicInteger numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
 
-		numberOfSyncronizedBlocks = 0;
+		numberOfSyncronizedBlocks.set(0);
 		needOtherPearToBeNotyfied = false;
 
 		List<BlockData> currentChainBlocks = getBlockchain().getChain().getBlocks();
@@ -116,6 +116,7 @@ public class Node implements Serializable {
 		// add blocks from peer chain to current chain
 		for (int idx = peerCommonBlockIndex.get() + 1; idx < peerBlocks.size(); ++idx) {
 			currentChainBlocks.add(peerBlocks.get(idx));
+			numberOfSyncronizedBlocks.incrementAndGet();
 		}
 
 		return ShCError.NO_ERROR;

@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.codec.language.bm.PhoneticEngine;
 import org.apache.http.HttpEntity;
@@ -89,7 +90,11 @@ public class NodeApplication {
 		ShCError error = currentNode.peerConnect(peerConnectingInformation);
 
 		if (ShCError.NO_ERROR == error) {
-			synchronizeeBlocksWithPear(currentNode, peerConnectingInformation.getUrl());
+			error = synchronizeeBlocksWithPear(currentNode, peerConnectingInformation, true);
+			if (ShCError.NO_ERROR != error) {
+				System.out.println("Error (OnPeerAskToConnect) can not synchronize blocks: " + error);
+			}			
+			//synchronizeeBlocksWithPear(currentNode, peerConnectingInformation.getUrl());
 		}
 
 		// call to peer to connect current node to him
@@ -127,22 +132,33 @@ public class NodeApplication {
 			return error;
 		}
 
-		Integer numberOfSyncronizedBlocks = new Integer(0);
-		Boolean needOtherPearToBeNotyfied = new Boolean(false);
-
-		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
+		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData, false);
 		if (ShCError.NO_ERROR != error) {
 			return error;
 		}
 
-		if (needOtherPearToBeNotyfied) {
-			
-			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
-			
-			notifyPear(peerNotificationData.getUrl(), notificatePearData);
-		}
+		return ShCError.NO_ERROR;
 
-		return ShCError.NOT_IMPLEMENTED;
+//		Integer numberOfSyncronizedBlocks = new Integer(0);
+//		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+//
+//		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
+//		if (ShCError.NO_ERROR != error) {
+//			return error;
+//		}
+//
+//		String skipNodeId = new String(skipNodeId = peerNotificationData.getNodeId());
+//		if (needOtherPearToBeNotyfied) {
+//			skipNodeId = "";		
+//		
+////			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
+////			notifyPear(peerNotificationData.getUrl(), notificatePearData);
+//		}
+//
+//		NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
+//		notifyPeersForNewBlock(currentNode, notificatePearData, skipNodeId);
+//
+//		return ShCError.NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -163,19 +179,45 @@ public class NodeApplication {
 		if (ShCError.NO_ERROR == error) {
 			NotificationBaseData notificationBaseData = new NotificationBaseData(node, false);
 
-			notifyPeersForNewBlock(node, notificationBaseData);
+			notifyPeersForNewBlock(node, notificationBaseData, "");
 		}
 
 		return error;
 	}
-
+	
 	@Async
-	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
-		Integer numberOfSyncronizedBlocks = new Integer(0);
+	public static ShCError synchronizeeBlocksWithPear(Node currentNode, NotificationBaseData peerNotificationData, boolean disableCallBackNotification) {
+
+		AtomicInteger numberOfSyncronizedBlocks = new AtomicInteger(0);
 		Boolean needOtherPearToBeNotyfied = new Boolean(false);
-		return synchronizeeBlocksWithPear(currentNode, otherNodeUrl, numberOfSyncronizedBlocks,
-				needOtherPearToBeNotyfied);
-	}
+
+		ShCError error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
+		if (ShCError.NO_ERROR != error) {
+			return error;
+		}
+
+		if (numberOfSyncronizedBlocks.get() > 0) {
+
+			String skipNodeId = new String(skipNodeId = peerNotificationData.getNodeId());
+
+			if (needOtherPearToBeNotyfied && (!disableCallBackNotification)) {
+				skipNodeId = "";		
+			}
+
+			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
+			notifyPeersForNewBlock(currentNode, notificatePearData, skipNodeId);			
+		}
+
+		return ShCError.NO_ERROR;
+	}	
+
+//	@Async
+//	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
+//		Integer numberOfSyncronizedBlocks = new Integer(0);
+//		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+//		return synchronizeeBlocksWithPear(currentNode, otherNodeUrl, numberOfSyncronizedBlocks,
+//				needOtherPearToBeNotyfied);
+//	}
 
 	/**
 	 * 
@@ -184,7 +226,7 @@ public class NodeApplication {
 	 */
 	@Async
 	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl,
-			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
+			AtomicInteger numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
 
 		try {
 
@@ -208,9 +250,11 @@ public class NodeApplication {
 	}
 
 	@Async
-	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData) {
+	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData, String skipNodeId) {
 		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
-			notifyPear(peer.getValue(), notificationBaseData);
+			if (!peer.getKey().equals(skipNodeId)) {
+				notifyPear(peer.getValue(), notificationBaseData);
+			}
 			// TODO may be implements peer new block confirmation
 		}
 	}

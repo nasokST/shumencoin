@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Constants {
 
-	public static long dificulty = 6;
+	public static long dificulty = 5;
 	public static BigInteger blockReward = new BigInteger("50000");
     public static long minFee = 10;
     public static long maxFee = 1000000;
