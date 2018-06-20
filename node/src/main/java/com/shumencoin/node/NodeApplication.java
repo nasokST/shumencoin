@@ -2,24 +2,17 @@ package com.shumencoin.node;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -29,7 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,8 +31,7 @@ import com.shumencoin.beans.Node;
 //import com.shumencoin.crypto.Crypto;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
-import com.shumencoin.beans_data.PeerConnectingInformation;
-import com.shumencoin.crypto.Crypto;
+import com.shumencoin.beans_data.NotificationBaseData;
 import com.shumencoin.errors.ShCError;
 
 @SpringBootApplication
@@ -92,24 +83,19 @@ public class NodeApplication {
 	 * @param peerConnectingInformation
 	 * @return
 	 */
-	public static ShCError peerAskToConnect(Node currentNode, PeerConnectingInformation peerConnectingInformation) {
+	public static ShCError OnPeerAskToConnect(Node currentNode, NotificationBaseData peerConnectingInformation) {
 
 		ShCError error = currentNode.peerConnect(peerConnectingInformation);
 
 		if (ShCError.NO_ERROR == error) {
-			synchronizeeBlocksWithPear(currentNode, peerConnectingInformation);
+			synchronizeeBlocksWithPear(currentNode, peerConnectingInformation.getUrl());
 		}
 
 		// call to peer to connect current node to him
-		if (peerConnectingInformation.isConnectionCallBack()) {
+		if (peerConnectingInformation.getNotificationCallBack()) {
 
-			PeerConnectingInformation currentNodeConnectingInformation = new PeerConnectingInformation();
-	
-			currentNodeConnectingInformation.setUrl(currentNode.getNode().getSelfUrl());
-			currentNodeConnectingInformation.setChainId(currentNode.getBlockchain().getChainId());
-			currentNodeConnectingInformation.setNodeId(currentNode.getNode().getNodeId());
-			currentNodeConnectingInformation.setConnectionCallBack(false);
-	
+			NotificationBaseData currentNodeConnectingInformation = new NotificationBaseData(currentNode, false);
+
 			ObjectMapper om = new ObjectMapper();
 			String currentNodeConnectingInformationJson = null;
 			try {
@@ -118,11 +104,73 @@ public class NodeApplication {
 				return ShCError.UNKNOWN;
 			}
 
-
-			postRequest(peerConnectingInformation.getUrl() + "/peers/connect", currentNodeConnectingInformationJson);			
+			postRequest(peerConnectingInformation.getUrl() + "/peers/connect", currentNodeConnectingInformationJson);
 		}
 
 		return error;
+	}
+
+	/**
+	 * This method is call from some another node to tell about new block
+	 * 
+	 * @return
+	 */
+	public static ShCError OnNewBlockNotification(Node currentNode, NotificationBaseData peerNotificationData) {
+
+		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ShCError error = currentNode.validateNotificationBaseData(peerNotificationData);
+		if (ShCError.NO_ERROR != error) {
+			return error;
+		}
+
+		Integer numberOfSyncronizedBlocks = new Integer(0);
+		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+
+		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
+		if (ShCError.NO_ERROR != error) {
+			return error;
+		}
+
+		if (needOtherPearToBeNotyfied) {
+			
+			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
+			
+			notifyPear(peerNotificationData.getUrl(), notificatePearData);
+		}
+
+		return ShCError.NOT_IMPLEMENTED;
+	}
+
+	/**
+	 * this method is call from miner when he mine new block
+	 * 
+	 * This method trying to submit new block and notify peers on success
+	 * 
+	 * @param minedBloce
+	 * @param newBlock
+	 * @return
+	 */
+	public static ShCError OnSubmitMinedBlock(Node node, MiningJobData minedBlock, BlockData newBlock) {
+
+		// notifyPear("http://127.0.0.1:8080", newBlock);
+
+		ShCError error = node.getBlockchain().submitMinedBlock(minedBlock, newBlock);
+
+		if (ShCError.NO_ERROR == error) {
+			NotificationBaseData notificationBaseData = new NotificationBaseData(node, false);
+
+			notifyPeersForNewBlock(node, notificationBaseData);
+		}
+
+		return error;
+	}
+
+	@Async
+	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
+		Integer numberOfSyncronizedBlocks = new Integer(0);
+		Boolean needOtherPearToBeNotyfied = new Boolean(false);
+		return synchronizeeBlocksWithPear(currentNode, otherNodeUrl, numberOfSyncronizedBlocks,
+				needOtherPearToBeNotyfied);
 	}
 
 	/**
@@ -131,57 +179,33 @@ public class NodeApplication {
 	 * @param peerConnectingInformation
 	 */
 	@Async
-	public static void synchronizeeBlocksWithPear(Node currentNode,
-			PeerConnectingInformation peerConnectingInformation) {
-
-		ShCError error = currentNode.validatePearInformation(peerConnectingInformation);
-		if (ShCError.NO_ERROR != error) {
-			return;
-		}
+	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl,
+			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
 
 		try {
 
 			// get pear chain
-			String pearChainJson = getRequest(peerConnectingInformation.getUrl() + "/blocks");
+			String pearChainJson = getRequest(otherNodeUrl + "/blocks");
 
 			ObjectMapper om = new ObjectMapper();
 			List<BlockData> peerBlocks = om.readValue(pearChainJson, new TypeReference<List<BlockData>>() {
 			});
 
-			currentNode.synchronizeeBlocksWithPear(peerBlocks);
+			return currentNode.synchronizeeBlocksWithPear(peerBlocks, numberOfSyncronizedBlocks,
+					needOtherPearToBeNotyfied);
 
 		} catch (ClientProtocolException e) {
-			System.out.println("ERROR synchronization with node: " + peerConnectingInformation.getUrl());
+			System.out.println("ERROR synchronization with node: " + otherNodeUrl);
 		} catch (IOException e) {
-			System.out.println("ERROR synchronization with node: " + peerConnectingInformation.getUrl());
+			System.out.println("ERROR synchronization with node: " + otherNodeUrl);
 		}
 
-		return;
+		return ShCError.UNKNOWN;
 	}
 
-	/**
-	 * tying to submit new block and notify peers on success
-	 * 
-	 * @param minedBloce
-	 * @param newBlock
-	 * @return
-	 */
-	public static ShCError submitMinedBlock(Node node, MiningJobData minedBlock, BlockData newBlock) {
-
-		// notifyPear("http://127.0.0.1:8080", newBlock);
-
-		ShCError error = node.getBlockchain().submitMinedBlock(minedBlock, newBlock);
-
-		if (ShCError.NO_ERROR == error) {
-			newBlockNotification(node, newBlock);
-		}
-
-		return error;
-	}
-
-	private static void newBlockNotification(Node node, BlockData newBlock) {
+	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData) {
 		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
-			notifyPear(peer.getValue(), newBlock);
+			notifyPear(peer.getValue(), notificationBaseData);
 			// TODO may be implements peer new block confirmation
 		}
 	}
@@ -193,12 +217,12 @@ public class NodeApplication {
 	 * @param newBlock
 	 */
 	@Async
-	private static void notifyPear(String peerHost, BlockData newBlock) {
+	private static void notifyPear(String peerHost, NotificationBaseData notificationBaseData) {
 
 		ObjectMapper ow = new ObjectMapper();
 		String newBlockJson = null;
 		try {
-			newBlockJson = ow.writeValueAsString(newBlock);
+			newBlockJson = ow.writeValueAsString(notificationBaseData);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return;

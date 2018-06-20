@@ -1,18 +1,15 @@
 package com.shumencoin.beans;
 
 import java.io.Serializable;
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.shumencoin.beans_data.BlockData;
-import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.NodeData;
-import com.shumencoin.beans_data.PeerConnectingInformation;
+import com.shumencoin.beans_data.NotificationBaseData;
 import com.shumencoin.beans_data.URL;
-import com.shumencoin.beans_data.helper.BlockHelper;
 import com.shumencoin.convertion.Converter;
 import com.shumencoin.crypto.Crypto;
 import com.shumencoin.errors.ShCError;
@@ -49,7 +46,7 @@ public class Node implements Serializable {
 		blockchain.initializeChain();
 	}
 
-	public ShCError validatePearInformation(PeerConnectingInformation peerConnectingInformation) {
+	public synchronized ShCError validateNotificationBaseData(NotificationBaseData peerConnectingInformation) {
 
 		if (getNode().getNodeId().equals(peerConnectingInformation.getNodeId())) {
 			return ShCError.SELF_CONNECTION;
@@ -59,24 +56,35 @@ public class Node implements Serializable {
 		}
 
 		return ShCError.NO_ERROR;
-	}	
+	}
 
-	public ShCError peerConnect(PeerConnectingInformation peerConnectingInformation) {
+	public synchronized ShCError peerConnect(NotificationBaseData peerConnectingInformation) {
 
-		ShCError error = validatePearInformation(peerConnectingInformation);
+		ShCError error = validateNotificationBaseData(peerConnectingInformation);
 		if (ShCError.NO_ERROR != error) {
 			return error;
 		}
-		
+
 		// TODO searching and remove for existing peerUrl but with different NodeId
 
 		getNode().getPeers().put(peerConnectingInformation.getNodeId(), peerConnectingInformation.getUrl());
 
 		return ShCError.NO_ERROR;
 	}
-	
-	public ShCError synchronizeeBlocksWithPear(List<BlockData> peerBlocks) {
+
+	/**
+	 * 
+	 * @param peerBlocks
+	 * @param numberOfSyncronizedBlocks
+	 * @param needOtherPearToBeNotyfied
+	 * @return
+	 */
+	public synchronized ShCError synchronizeeBlocksWithPear(List<BlockData> peerBlocks,
+			Integer numberOfSyncronizedBlocks, Boolean needOtherPearToBeNotyfied) {
+		
 		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		numberOfSyncronizedBlocks = 0;
+		needOtherPearToBeNotyfied = false;
 		return ShCError.UNKNOWN;
 	}
 
