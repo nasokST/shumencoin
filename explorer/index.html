@@ -19,10 +19,12 @@
 <script type="application/javascript">
 $( document ).ready(function() {
 
+	var port = "8080";
+
 	(function(){
 	   var f = function() {
 	   $.ajax({
-		  url: 'http://localhost:8080/blocks',
+		  url: 'http://localhost:' + port + '/blocks',
 		  type: 'GET',
 		  dataType: 'json',
 		  success: function(data) { 
@@ -32,7 +34,7 @@ $( document ).ready(function() {
 		});
 		
 		$.ajax({
-			url: 'http://localhost:8080/transactions/confirmed',
+			url: 'http://localhost:' + port + '/transactions/confirmed',
 			type: 'GET',
 			dataType: 'json',
 			success: function(data) { 
@@ -42,7 +44,7 @@ $( document ).ready(function() {
 		});
 		
 		$.ajax({
-			url: 'http://localhost:8080/transactions/pending',
+			url: 'http://localhost:' + port + '/transactions/pending',
 			type: 'GET',
 			dataType: 'json',
 			success: function(data) { 
@@ -51,7 +53,15 @@ $( document ).ready(function() {
 			beforeSend: setHeader
 		});
 
-		
+		$.ajax({
+		  url: 'http://localhost:' + port + '/peers',
+		  type: 'GET',
+		  dataType: 'json',
+		  success: function(data) { 
+			fillInPeersTable(data);
+		  },
+		  beforeSend: setHeader
+		});
 	   };
 	   window.setInterval(f, 10000);
 	   f();
@@ -108,10 +118,27 @@ $( document ).ready(function() {
 				"info": false,});
 	}
 	
-	function setHeader(xhr) {
-		xhr.setRequestHeader('Origin', 'http://localhost:8080/');
+	function fillInPeersTable(data) {
+		$('#peers-table').DataTable().clear().destroy();
+		$.each(data, function(index, element) { 		
+			var html = "<tr>"
+						+ "<td>" + index +"</td>"
+						+ "<td>" + element +"</td>"
+					+ "</tr>";
+			$( "#peers-table-body" ).append(html);
+		});
+		$('#peers-table').DataTable({
+                "fixedHeader": true,
+                "responsive": true,
+				"lengthChange": false,               
+				"searching": false,
+				"paginate": false,
+				"info": false,});
 	}
 	
+	function setHeader(xhr) {
+		xhr.setRequestHeader('Origin', 'http://localhost:' + port + '/');
+	}
 });
 
 </script>
@@ -122,6 +149,8 @@ $( document ).ready(function() {
         <li class="active"><a data-toggle="tab" href="#sectionA">Blocks</a></li>
         <li><a data-toggle="tab" href="#sectionB">Confirmed Transactions</a></li>
         <li><a data-toggle="tab" href="#sectionC">Pending Transactions</a></li>
+        <li><a data-toggle="tab" href="#sectionD">Peers</a></li>
+        <li><a data-toggle="tab" href="#sectionE">Accounts and balances</a></li>
         <li class='pull-right'><h4>ShumenCoin</h4></li>
     </ul>
     <div class="tab-content">
@@ -191,6 +220,27 @@ $( document ).ready(function() {
 					<tbody id="pending-transactions-table-body">
 					</tbody>
 				</table>
+			</div>
+        </div>
+        <div id="sectionD" class="tab-pane fade">
+            <h3>Peers</h3>
+			<div class="container-fluid">
+				<table id="peers-table" class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>NodeID</th>
+							<th>URL</th>
+						</tr>
+					</thead>
+					<tbody id="peers-table-body">
+					</tbody>
+				</table>
+			</div>
+        </div>
+        <div id="sectionE" class="tab-pane fade">
+            <h3>Accounts and balances</h3>
+			<div class="container-fluid">
+				TODO
 			</div>
         </div>
     </div>
