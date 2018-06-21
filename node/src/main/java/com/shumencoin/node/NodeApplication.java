@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.HttpEntity;
@@ -24,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -47,17 +45,6 @@ public class NodeApplication {
 	public static void main(String[] args) {
 
 		Security.addProvider(new BouncyCastleProvider());
-
-		// //byte[] privKey = Crypto.generatePrivateKey();
-		// byte[] privKey =
-		// Converter.HexStringToByteArray("7e4670ae70c98d24f3662c172dc510a085578b9ccc717e6c2f4e547edd960a34");
-		// byte[] pubKey = Crypto.generatePublicKey(privKey);
-		// byte[] pubKeyCompressed = Crypto.compressPublicKey(pubKey);
-		//
-		// System.out.println("PK: " + Converter.byteArrayToHexString(privKey));
-		// System.out.println("PubK: " + Converter.byteArrayToHexString(pubKey));
-		// System.out.println("PubKCompress: " +
-		// Converter.byteArrayToHexString(pubKeyCompressed));
 
 		for (String s : args) {
 			switch (s.substring(0, 2)) {
@@ -336,5 +323,4 @@ public class NodeApplication {
 
 		return responseJson;
 	}
-	
 }

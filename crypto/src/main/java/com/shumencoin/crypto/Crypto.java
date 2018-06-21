@@ -1,16 +1,15 @@
 package com.shumencoin.crypto;
 
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.util.Arrays;
 
+//import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.math.ec.ECPoint;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 
@@ -52,31 +51,20 @@ public class Crypto {
 		return privateKeyAttempt;
 	}
 
-//	public static byte[] generatePublicKey(byte[] privateKey) {
-//		try {
-//			ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
-//			ECPoint pointQ = spec.getG().multiply(new BigInteger(1, privateKey));
-//
-//			return pointQ.getEncoded(false);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new byte[0];
-//		}
-//	}
-
-	 /**
+	/**
 	 * https://gist.github.com/nakov/b01f9434df3350bc9b1cbf9b04ddb605
+	 *
 	 * @param privateKey
 	 * @return
 	 */
-	 public static byte[] generatePublicKey(byte[] privateKey) {
-	 BigInteger privKey = new BigInteger(privateKey);
-	 BigInteger publicKey = Sign.publicKeyFromPrivate(privKey);
-	
-	 ECKeyPair keyPair = new ECKeyPair(privKey, publicKey);
-	
-	 return keyPair.getPublicKey().toByteArray();
-	 }
+	public static byte[] generatePublicKey(byte[] privateKey) {
+		BigInteger privKey = new BigInteger(privateKey);
+		BigInteger publicKey = Sign.publicKeyFromPrivate(privKey);
+
+		ECKeyPair keyPair = new ECKeyPair(privKey, publicKey);
+
+		return keyPair.getPublicKey().toByteArray();
+	}
 
 	/**
 	 * https://gist.github.com/nakov/b01f9434df3350bc9b1cbf9b04ddb605
@@ -94,17 +82,88 @@ public class Crypto {
 		return Converter.HexStringToByteArray(pubKeyYPrefix + pubKeyX);
 	}
 
-	public static byte[] generateAddress(byte[] publicKey) {
-		return null;
+	public static byte[] generateAddress(byte[] publicKeyBytes) {
+		try {
+			RIPEMD160Digest d = new RIPEMD160Digest();
+
+			d.reset();
+			d.update(publicKeyBytes, 1, publicKeyBytes.length - 1);
+			byte[] publicShaKeyBytes = new byte[20];
+			d.doFinal(publicShaKeyBytes, 0);
+
+			return publicShaKeyBytes;
+
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
-	public static byte[][] signTransaction(String data, byte[] privateKey) {
-		return null;
+	public static byte[][] getTransactionSignatureData(byte[] msg, byte[] privateKey) throws SignatureException {
+
+		BigInteger privKey = new BigInteger(privateKey);
+		BigInteger publicKey = Sign.publicKeyFromPrivate(privKey);
+
+		ECKeyPair keyPair = new ECKeyPair(privKey, publicKey);
+
+		//byte[] msgHash = Hash.sha3(msg);
+		Sign.SignatureData signature = Sign.signMessage(msg, keyPair, true);
+
+		byte[][] signatureBts = new byte[3][];
+		
+		signatureBts[0] = new byte[1];
+		signatureBts[1] = new byte[32];
+		signatureBts[2] = new byte[32];
+
+		signatureBts[0][0] = signature.getV();
+		signatureBts[1] = Arrays.copyOfRange(signature.getR(), 0, signature.getR().length);
+		signatureBts[2] = Arrays.copyOfRange(signature.getS(), 0, signature.getS().length);
+		
+		
+		System.out.println("\n --- getTransactionSignatureData ---");
+		System.out.println("PK: " + Converter.byteArrayToHexString(keyPair.getPrivateKey().toByteArray()));
+		System.out.println("PubKey: " + Converter.byteArrayToHexString(keyPair.getPublicKey().toByteArray()));
+		System.out.println("v: " + signature.getV());
+		System.out.println("r: " + Converter.byteArrayToHexString(signature.getR()));
+		System.out.println("s: " + Converter.byteArrayToHexString(signature.getS()));
+		System.out.println(" --- END getTransactionSignatureData --- \n");
+
+		return signatureBts;
 	}
 
-	public static boolean verifyTransaction(String data, byte[] privateKey) {
-		return true;
+	public static boolean verifyTransaction(byte[] address, byte[] msg, byte v, byte[] r, byte[] s) throws SignatureException {
+
+		Sign.SignatureData signature = new Sign.SignatureData(v, r, s);
+
+		BigInteger pubKeyRecovered = Sign.signedMessageToKey(msg, signature);
+		byte[] pubKeyRecoveredCompressed = compressPublicKey(pubKeyRecovered.toByteArray());
+		byte[] addressRecovered = generateAddress(pubKeyRecoveredCompressed);
+
+		System.out.println("\n --- verifyTransaction---");
+		System.out.println("rPK: " + Converter.byteArrayToHexString(pubKeyRecovered.toByteArray()));
+		System.out.println("rPKCompress: " + Converter.byteArrayToHexString(pubKeyRecoveredCompressed));
+		System.out.println("rAddress: " + Converter.byteArrayToHexString(addressRecovered));
+		System.out.println(" --- END verifyTransaction--- \n");
+		
+		if (Arrays.equals(address, addressRecovered)) {
+			return true;
+		}
+
+		return false;
 	}
+
+	// public static boolean verifyTransaction(String address, byte[] msg, byte v,
+	// byte[] r, byte[] s) {
+	//
+	// Sign.SignatureData signature = new Sign.SignatureData(v, r, s);
+	//
+	// BigInteger pubKeyRecovered = Sign.signedMessageToKey(msg, signature);
+	//
+	// System.out.println("Recovered public key: " + pubKeyRecovered.toString(16));
+	//
+	// boolean validSig = pubKey.equals(pubKeyRecovered);
+	//
+	// System.out.println("Signature valid? " + validSig);
+	// }
 
 	public static byte[] sha256(String rowText) {
 		try {
