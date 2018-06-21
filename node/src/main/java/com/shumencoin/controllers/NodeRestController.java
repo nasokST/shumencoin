@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shumencoin.beans.Node;
+import com.shumencoin.beans_data.BalanceBean;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.NotificationBaseData;
@@ -89,6 +90,11 @@ public class NodeRestController {
 		return new ResponseEntity<Object>("getTransactionSend() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
 	}
 
+	@RequestMapping("/transactions/balances")
+	public List<BalanceBean> getBalances() {
+	    return node.getBlockchain().getBalances();
+	}
+	
 	// ====== ADDRESS =====
 	@RequestMapping("/address/{address}/transactions")
 	public ResponseEntity<?> addressGetTransactions() {

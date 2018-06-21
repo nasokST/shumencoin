@@ -3,9 +3,12 @@ package com.shumencoin.beans;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import com.shumencoin.beans_data.BalanceBean;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.BlockchainData;
 import com.shumencoin.beans_data.MiningJobData;
@@ -170,5 +173,54 @@ public class Blockchain implements Serializable {
 		}
 	    }
 	    throw new Exception(hash);
+	}
+
+	public List<BalanceBean> getBalances() {
+	    
+	    List<TransactionData> confirmedTransactions = new ArrayList<TransactionData>();
+	    for(BlockData block : chain.getBlocks()) {
+		confirmedTransactions.addAll(block.getTransactions());
+	    }
+	    List<BalanceBean> confirmedBalances = calculateBalances(confirmedTransactions);
+	    
+	    List<TransactionData> pendingTransactionsHelper = new ArrayList<TransactionData>();
+	    pendingTransactionsHelper.addAll(getChain().getPendingTransactions());
+	    pendingTransactionsHelper.addAll(confirmedTransactions);
+	    
+	    List<BalanceBean> pendingBalances = calculateBalances(pendingTransactionsHelper);
+	    
+	    for(BalanceBean bb: pendingBalances) {
+		for(BalanceBean bbc: confirmedBalances) {
+		    if(bb.getAddress().equals(bbc.getAddress())) {
+			bb.setConfirmedBalance(bbc.getPendingBalance());
+			break;
+		    }
+		}
+	    }
+	    
+	    return pendingBalances;
+	}
+	
+	private List<BalanceBean> calculateBalances(List<TransactionData> transactions) {
+	    List<BalanceBean> bba = new ArrayList<BalanceBean>();
+	    Map<String, BigInteger> balanceMap = new HashMap<String, BigInteger>();
+	    for(TransactionData tr : transactions) {
+		if(balanceMap.get(tr.getTo()) == null) {
+		    balanceMap.put(tr.getTo(), BigInteger.valueOf(0l));
+		}
+		if(balanceMap.get(tr.getFrom()) == null) {
+		    balanceMap.put(tr.getFrom(), BigInteger.valueOf(0l));
+		}
+		balanceMap.put(tr.getTo(), balanceMap.get(tr.getTo()).add(tr.getValue()) );
+		balanceMap.put(tr.getFrom(), balanceMap.get(tr.getFrom()).subtract(tr.getValue()).subtract(BigInteger.valueOf(tr.getFee())) );
+	    }
+	    
+	    for (String key : balanceMap.keySet()) {
+		BalanceBean bb = new BalanceBean();
+		bb.setAddress(key);
+		bb.setPendingBalance(balanceMap.get(key));
+		bba.add(bb);
+	    }
+	    return bba;
 	}
 }
