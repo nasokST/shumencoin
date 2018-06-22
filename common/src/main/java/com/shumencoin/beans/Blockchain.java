@@ -144,12 +144,12 @@ public class Blockchain implements Serializable {
 				newTd.setTransferSuccessful(false);
 			}
 
-			TransactionHelper.calculateTransactionDataHash(newTd);			
+			TransactionHelper.calculateAndSetTransactionDataHash(newTd);			
 			nextBlocktransactions.add(newTd);
 		}
 
 		rewardTransaction.getValue().add(feeSum);
-		TransactionHelper.calculateTransactionDataHash(rewardTransaction);
+		TransactionHelper.calculateAndSetTransactionDataHash(rewardTransaction);
 
 		nextBlocktransactions.add(rewardTransaction);
 

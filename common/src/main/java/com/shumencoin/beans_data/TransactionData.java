@@ -25,12 +25,14 @@ public class TransactionData implements Serializable {
     private String transactionDataHash;  // 64 hex digits  // Calculate the transaction data hash if it is missing
 	@JsonDeserialize(using = SignatureDeserializer.class)
 	@JsonSerialize(using = SignatureSerializer.class)	    
-    private byte[][] senderSignature; // hex_number[2][64]
+    private byte[][] senderSignature;
     private long minedInBlockIndex; //integer
     private boolean transferSuccessful; // boolean
 
     public TransactionData() {
-    	senderSignature = new byte[2][32];
+    	senderSignature = new byte[2][];
+    	senderSignature = new byte[0][33];
+    	senderSignature = new byte[1][32];
     }
 
     public TransactionData(TransactionData other) {
@@ -44,8 +46,10 @@ public class TransactionData implements Serializable {
     	this.setSenderPubKey(other.getSenderPubKey());
     	this.setTransactionDataHash(other.getTransactionDataHash());
 
-    	this.senderSignature = new byte[2][32];
-    	this.senderSignature[0] = Arrays.copyOf(other.getSenderSignature()[0], other.getSenderSignature()[0].length);
+    	this.senderSignature = new byte[2][];
+    	this.senderSignature = new byte[0][33];
+    	this.senderSignature = new byte[1][32];
+		this.senderSignature[0] = Arrays.copyOf(other.getSenderSignature()[0], other.getSenderSignature()[0].length);
     	this.senderSignature[1] = Arrays.copyOf(other.getSenderSignature()[1], other.getSenderSignature()[1].length);
 
     	this.setMinedInBlockIndex(other.getMinedInBlockIndex());

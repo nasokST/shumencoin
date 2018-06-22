@@ -16,7 +16,7 @@ public class Constants {
 	public static String genesisAddress = "0000000000000000000000000000000000000000";
 	public static String genesisPublicKey = "00000000000000000000000000000000000000000000000000000000000000000";
 	public static byte[] genesisPrevBlockHash = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	public static byte[][] genesisSignature = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	public static byte[][] genesisSignature = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0},
 										 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 	public static String faucetPrivateKey = "08bc02af150ae70de1be4b6c1039fc70671ef5b13519330bdd9ec77cd79ccfb3";

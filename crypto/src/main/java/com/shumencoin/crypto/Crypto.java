@@ -108,15 +108,14 @@ public class Crypto {
 		//byte[] msgHash = Hash.sha3(msg);
 		Sign.SignatureData signature = Sign.signMessage(msg, keyPair, true);
 
-		byte[][] signatureBts = new byte[3][];
+		byte[][] signatureBts = new byte[2][];
 		
-		signatureBts[0] = new byte[1];
+		signatureBts[0] = new byte[33];
 		signatureBts[1] = new byte[32];
-		signatureBts[2] = new byte[32];
 
-		signatureBts[0][0] = signature.getV();
-		signatureBts[1] = Arrays.copyOfRange(signature.getR(), 0, signature.getR().length);
-		signatureBts[2] = Arrays.copyOfRange(signature.getS(), 0, signature.getS().length);
+		System.arraycopy(signature.getR(), 0, signatureBts[0], 0, signature.getR().length);
+		signatureBts[0][32] = signature.getV();
+		signatureBts[1] = Arrays.copyOfRange(signature.getS(), 0, signature.getS().length);
 		
 		
 		System.out.println("\n --- getTransactionSignatureData ---");
