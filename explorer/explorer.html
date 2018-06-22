@@ -36,7 +36,41 @@
 		}
 	};
 	
-	function createNewTransaction() {
+	function getFormData($form){
+		var unindexed_array = $form.serializeArray();
+		var indexed_array = {};
+
+		$.map(unindexed_array, function(n, i){
+			indexed_array[n['name']] = n['value'];
+		});
+
+		return indexed_array;
+	}
+	
+	function createTransaction(){
+		var $form = $("#sender"); //transactionData
+		//password password_tr
+		// cryptodata is json json_tr
+		
+		var tr_data = {transactionData:getFormData($form), password:$("#password_tr").val(), cryptoData:JSON.parse($("#json_tr").val())}; 
+		
+		$.ajax({
+		  url: 'http://localhost:' + port + '/wallet/transaction',
+		  type: 'POST',
+          dataType: 'json',
+		  contentType: "application/json; charset=utf-8",
+		  data: JSON.stringify(tr_data),
+		  success: function(data) {
+			$("#transaction_response").append("<div id='success-alert' class='alert alert-info alert-dismissible fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Transaction created. Expect your ShumenCoin soon.</div>");
+		  },
+		  error: function(data) {
+			$("#transaction_response").append("<div class='alert alert-danger alert-dismissible fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + data.responseJSON + "</div>");
+		  },
+		});
+	}
+	
+	
+	function createNewFaucetTransaction() {
 		var address = $("#address").val();
 		$.ajax({
 		  url: 'http://localhost:' + port + '/transactions/send/faucet',
@@ -351,7 +385,7 @@ function setHeader(xhr) {
             <h3>Faucet</h3>
 			<div class="container-fluid">
 				<label for="address">Address of receiver (PublicKey):</label>
-				<input type="address" style="width:400px" id="address"> <button onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
+				<input type="address" style="width:400px" id="address"> <button onclick="javascript:createNewFaucetTransaction()" class="btn btn-default">Submit</button>
 				<div id="alert-container"></div>
 			</div>
         </div>
@@ -366,6 +400,22 @@ function setHeader(xhr) {
         <div id="sectionH" class="tab-pane fade">
             <h3>Sender</h3>
 			<div class="container-fluid">
+				<label for="json">JSON:</label>
+				<input type="text-area" style="width:400px" name="json" id="json_tr"></br>
+				<label for="password">Password:</label>
+				<input type="text" style="width:400px" id="password_tr" name="password"> 
+				<form class="form" id="sender">
+					<label for="to">To:</label>
+					<input type="text" style="width:400px" name="to"> </br>
+					<label for="value">Value:</label>
+					<input type="text" style="width:400px" name="value"> </br>
+					<label for="fee">Fee:</label>
+					<input type="text" style="width:400px" name="fee"> </br>
+					<label for="data">Data:</label>
+					<input type="text" style="width:400px" name="data"> </br>
+					<button id="submit" onclick="javascript:createTransaction(); return false;" class="btn btn-default">Submit</button> </br></br>
+				</form>
+				<div id="transaction_response"></div>
 			</div>
         </div>
     </div>

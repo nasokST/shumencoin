@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -147,9 +148,11 @@ public class NodeRestController {
 	return new ResponseEntity<Object>("Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @CrossOrigin
     @PostMapping("/wallet/transaction")
     public ResponseEntity<?> walletSendTransaction(@RequestBody WalletSendTransactionData walletSendTransactionData) {
 
+	walletSendTransactionData.getTransactionData().setFrom(walletSendTransactionData.getCryptoData().address);
 	ShCError error = NodeApplication.OnWalletNewTransaction(node, walletSendTransactionData);
 	if (ShCError.NO_ERROR == error) {
 	    return new ResponseEntity<Object>(error, HttpStatus.OK);
