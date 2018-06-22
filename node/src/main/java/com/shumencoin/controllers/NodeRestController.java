@@ -84,9 +84,9 @@ public class NodeRestController {
 		}
 	}
 
-	@RequestMapping("/transactions/send")
-	public ResponseEntity<?> getTransactionSend() {
-		// TODO
+	@PostMapping("/transactions/send")
+	public ResponseEntity<?> getTransactionSend(@RequestBody String address) {
+	    String address2 = address.substring(0, address.length()-1);
 		return new ResponseEntity<Object>("getTransactionSend() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
 	}
 
