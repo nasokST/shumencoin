@@ -17,10 +17,51 @@
 </style>
 
 <script type="application/javascript">
-$( document ).ready(function() {
+
 
 	var port = "8080";
 
+	var getUrlParameter = function getUrlParameter(sParam) {
+		var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+			sURLVariables = sPageURL.split('&'),
+			sParameterName,
+			i;
+
+		for (i = 0; i < sURLVariables.length; i++) {
+			sParameterName = sURLVariables[i].split('=');
+
+			if (sParameterName[0] === sParam) {
+				return sParameterName[1] === undefined ? true : sParameterName[1];
+			}
+		}
+	};
+	
+	function createNewTransaction() {
+		var address = $("#address").val();
+		$.ajax({
+		  url: 'http://localhost:' + port + '/transactions/send/faucet',
+		  type: 'POST',
+		  data: address,
+		  processData: false,
+		  success: function(data) {
+			$("#alert-container").append("<div id='success-alert' class='alert alert-info alert-dismissible fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Transaction created. Expect your ShumenCoin soon.</div>");
+		  },
+		  error: function(data) {
+			$("#alert-container").append("<div class='alert alert-danger alert-dismissible fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Something went wrong</div>");
+		  },
+		  beforeSend: setHeader
+		});
+	}
+	
+$( document ).ready(function() {
+
+	var portParam = getUrlParameter('port');
+	if(portParam != null) {
+		port = portParam;
+	}
+	
+	window.setTimeout(function() { $(".alert-message").alert('close'); }, 2000);
+	
 	(function(){
 	   var f = function() {
 	   $.ajax({
@@ -166,10 +207,11 @@ $( document ).ready(function() {
 				"info": false,});
 	}
 	
-	function setHeader(xhr) {
-		xhr.setRequestHeader('Origin', 'http://localhost:' + port + '/');
-	}
 });
+
+function setHeader(xhr) {
+	xhr.setRequestHeader('Origin', 'http://localhost:' + port + '/');
+}
 
 </script>
 </head>
@@ -181,7 +223,10 @@ $( document ).ready(function() {
         <li><a data-toggle="tab" href="#sectionC">Pending Transactions</a></li>
         <li><a data-toggle="tab" href="#sectionD">Peers</a></li>
         <li><a data-toggle="tab" href="#sectionE">Accounts and balances</a></li>
-        <li class='pull-right'><h4>ShumenCoin</h4></li>
+        <li><a data-toggle="tab" href="#sectionF">Faucet</a></li>
+        <li><a data-toggle="tab" href="#sectionG">Wallet</a></li>
+        <li><a data-toggle="tab" href="#sectionH">Sender</a></li>
+        <li class='pull-right'><h4>ShumenCoin Command Center</h4></li>
     </ul>
     <div class="tab-content">
         <div id="sectionA" class="tab-pane fade in active">
@@ -281,6 +326,27 @@ $( document ).ready(function() {
 					<tbody id="balances-table-body">
 					</tbody>
 				</table>
+			</div>
+        </div>
+        <div id="sectionF" class="tab-pane fade">
+            <h3>Faucet</h3>
+			<div class="container-fluid">
+				<label for="email">Address of receiver (PublicKey):</label>
+				<input type="address" style="width:400px" id="address"> <button onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
+				<div id="alert-container"></div>
+			</div>
+        </div>
+        <div id="sectionG" class="tab-pane fade">
+            <h3>Wallet</h3>
+			<div class="container-fluid">
+				<label for="email">Encrypt your password:</label>
+				<input type="address" style="width:400px" id="address"> <button id="submit" onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
+				<div id="alert-container"></div>
+			</div>
+        </div>
+        <div id="sectionH" class="tab-pane fade">
+            <h3>Sender</h3>
+			<div class="container-fluid">
 			</div>
         </div>
     </div>
