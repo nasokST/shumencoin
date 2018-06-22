@@ -29,7 +29,7 @@ public class BlockHelper {
 
 		return genesisBlock;
 	}
-
+	
 	public static String calculateBlockDataHash(BlockData block) {
 
 		BlockDataHashHelper blockDataHashHelper = new BlockDataHashHelper();

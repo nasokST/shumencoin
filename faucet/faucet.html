@@ -17,8 +17,7 @@
 <script type="application/javascript">
 var port = "8080";
 function createNewTransaction() {
-
-	var address = 'lalala';
+	var address = $("#address").val();
 	$.ajax({
 	  url: 'http://localhost:' + port + '/transactions/send',
 	  type: 'POST',
@@ -40,11 +39,8 @@ function setHeader(xhr) {
 <div class="bs-example">
 	
 <p>Faucet</p>	
-<label for="email">Email address:</label>
-<input type="email" class="form-control" id="email">
-<button id="submit" onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
-	
-	
+<label for="email">Address of receiver (PublicKey):</label>
+<input type="address" style="width:150px" id="address"> <button id="submit" onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
 </div>
 </body>
 </html>                            

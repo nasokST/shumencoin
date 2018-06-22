@@ -86,8 +86,12 @@ public class NodeRestController {
 
 	@PostMapping("/transactions/send")
 	public ResponseEntity<?> getTransactionSend(@RequestBody String address) {
-	    String address2 = address.substring(0, address.length()-1);
-		return new ResponseEntity<Object>("getTransactionSend() NOT IMPLEMENTED ", HttpStatus.BAD_REQUEST);
+	    String addressString = address.substring(0, address.length()-1);
+	    if(node.getBlockchain().generateFaucetTransaction(addressString)) {
+		return new ResponseEntity<Object>("Success", HttpStatus.OK);
+	    } else {
+		return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
+	    }
 	}
 
 	@RequestMapping("/transactions/balances")
