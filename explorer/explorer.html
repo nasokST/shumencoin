@@ -53,6 +53,25 @@
 		});
 	}
 	
+	
+	function createNewWallet() {
+		var address = $("#password").val();
+		$.ajax({
+		  url: 'http://localhost:' + port + '/wallet/account',
+		  type: 'POST',
+		  data: address,
+		  processData: false,
+		  success: function(data) {
+			$("#wallet-json").remove();
+			$("#json-container").append("<div class='alert alert-danger alert-dismissible fade in' id='wallet-json' style='white-space:pre-wrap; word-wrap:break-word;'>" + data + "</div>");
+		  },
+		  error: function(data) {
+			$("#json-container").append("<div class='alert alert-danger alert-dismissible fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Something went wrong</div>");
+		  },
+		  beforeSend: setHeader
+		});
+	}
+	
 $( document ).ready(function() {
 
 	var portParam = getUrlParameter('port');
@@ -331,7 +350,7 @@ function setHeader(xhr) {
         <div id="sectionF" class="tab-pane fade">
             <h3>Faucet</h3>
 			<div class="container-fluid">
-				<label for="email">Address of receiver (PublicKey):</label>
+				<label for="address">Address of receiver (PublicKey):</label>
 				<input type="address" style="width:400px" id="address"> <button onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
 				<div id="alert-container"></div>
 			</div>
@@ -339,9 +358,9 @@ function setHeader(xhr) {
         <div id="sectionG" class="tab-pane fade">
             <h3>Wallet</h3>
 			<div class="container-fluid">
-				<label for="email">Encrypt your password:</label>
-				<input type="address" style="width:400px" id="address"> <button id="submit" onclick="javascript:createNewTransaction()" class="btn btn-default">Submit</button>
-				<div id="alert-container"></div>
+				<label for="password">Encrypt your password:</label>
+				<input type="password" style="width:400px" id="password"> <button id="submit" onclick="javascript:createNewWallet()" class="btn btn-default">Submit</button>
+				<div id="json-container"></div>
 			</div>
         </div>
         <div id="sectionH" class="tab-pane fade">
