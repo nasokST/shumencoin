@@ -1,11 +1,15 @@
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Arrays;
 
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.beans_data.helper.TransactionHelper;
 import com.shumencoin.constants.Constants;
@@ -84,5 +88,21 @@ public class CryptoTest {
 		ShCError validTransaction = TransactionHelper.validateSignatute(transaction);
 		
 	 	assertTrue("Not valid transaction", (validTransaction == ShCError.NO_ERROR));
-	}	
+	}
+	
+	@Test
+	public void privateKeyEncryptDecrypt() throws DataLengthException, InvalidCipherTextException, IOException {
+
+		String password= "beer";		
+		byte[] privateKey = Converter
+				.HexStringToByteArray("78a75639dda5267b5a52c3690ed1a13be003c30e70bc86b332a00b123dcec288");
+
+		String json = Crypto.encryptionPrivateKey(password, privateKey);
+		
+		password= "beer1";
+
+		byte[] decodedPrivateKey = Crypto.decryptPrivateKey(json, password);
+
+		assertTrue("Private key not valid", (Arrays.equals(privateKey, decodedPrivateKey)));
+	}
 }

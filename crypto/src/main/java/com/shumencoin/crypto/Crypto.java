@@ -1,6 +1,8 @@
 package com.shumencoin.crypto;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,11 +10,22 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Arrays;
 
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 //import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.SCrypt;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shumencoin.convertion.Converter;
 
 public class Crypto {
@@ -98,6 +111,102 @@ public class Crypto {
 		}
 	}
 
+	public static String encryptionPrivateKey(String rawPassword, byte[] privateKey)
+			throws DataLengthException, InvalidCipherTextException, JsonProcessingException {
+
+		byte[] password = rawPassword.getBytes();
+		byte[] message = privateKey;
+
+		CryptoData cryptoData = new CryptoData();
+
+		// SCrypt
+		SecureRandom secureRandom = new SecureRandom();
+		secureRandom.nextBytes(cryptoData.script.salt);
+
+		byte[] cryptHash = generateSCryptHash(password, cryptoData);
+
+		byte[] encryption_key = Arrays.copyOfRange(cryptHash, 0, 32);
+		byte[] hmac_key = Arrays.copyOfRange(cryptHash, 32, 64);
+
+		// TwoFish
+		secureRandom.nextBytes(cryptoData.iv);
+
+		Twofish_CBC_PKCS7 twofish_CBC_PKCS7 = new Twofish_CBC_PKCS7();
+		twofish_CBC_PKCS7.setKey(encryption_key);
+		cryptoData.twofish = twofish_CBC_PKCS7.encrypt(message, cryptoData.iv);
+
+		// HMAC
+		hmac_hash(new SHA256Digest(), hmac_key, message, cryptoData.mac);
+
+		// JSON
+		ObjectMapper ow = new ObjectMapper();
+		String json = ow.writeValueAsString(cryptoData);
+
+		return json;
+	}
+
+	public static byte[] decryptPrivateKey(String rawJson, String rawPassword) throws JsonParseException,
+			JsonMappingException, IOException, DataLengthException, InvalidCipherTextException {
+
+		byte[] password = rawPassword.getBytes(Charset.forName("UTF-8"));
+
+		// Parse JSON
+		ObjectMapper objectMapper = new ObjectMapper();
+		CryptoData cryptoData = objectMapper.readValue(rawJson, CryptoData.class);
+
+		// SCrypt
+		byte[] cryptHash = generateSCryptHash(password, cryptoData);
+
+		byte[] encryption_key = Arrays.copyOfRange(cryptHash, 0, 32);
+		byte[] hmac_key = Arrays.copyOfRange(cryptHash, 32, 64);
+
+		// TwoFish
+		Twofish_CBC_PKCS7 twofish_CBC_PKCS7 = new Twofish_CBC_PKCS7();
+
+		twofish_CBC_PKCS7.setKey(encryption_key);
+		byte[] decryptedMessage = twofish_CBC_PKCS7.decrypt(cryptoData.twofish, cryptoData.iv);
+
+		System.out.println("Decrypted message: " + Converter.byteArrayToHexString(decryptedMessage));
+
+		// HMAC
+		byte[] newMac = new byte[32];
+		hmac_hash(new SHA256Digest(), hmac_key, decryptedMessage, newMac);
+
+		if (Arrays.equals(newMac, cryptoData.mac)) {
+			System.out.println("mac OK");
+			return decryptedMessage;
+		} else {
+			System.out.println("mac NOK");
+			return null;
+		}
+	}
+
+	static byte[] generateSCryptHash(byte[] password, CryptoData cryptoData) {
+		return SCrypt.generate(password, cryptoData.script.salt, cryptoData.script.n, cryptoData.script.r,
+				cryptoData.script.p, cryptoData.script.dklen);
+	}
+
+	static void hmac_hash(Digest digest, byte[] secret, byte[] seed, byte[] out) {
+		HMac mac = new HMac(digest);
+		KeyParameter param = new KeyParameter(secret);
+		byte[] a = seed;
+		int size = digest.getDigestSize();
+		int iterations = (out.length + size - 1) / size;
+		byte[] buf = new byte[mac.getMacSize()];
+		byte[] buf2 = new byte[mac.getMacSize()];
+		for (int i = 0; i < iterations; i++) {
+			mac.init(param);
+			mac.update(a, 0, a.length);
+			mac.doFinal(buf, 0);
+			a = buf;
+			mac.init(param);
+			mac.update(a, 0, a.length);
+			mac.update(seed, 0, seed.length);
+			mac.doFinal(buf2, 0);
+			System.arraycopy(buf2, 0, out, (size * i), Math.min(size, out.length - (size * i)));
+		}
+	}
+
 	public static byte[][] getTransactionSignatureData(byte[] msg, byte[] privateKey) throws SignatureException {
 
 		BigInteger privKey = new BigInteger(privateKey);
@@ -105,19 +214,18 @@ public class Crypto {
 
 		ECKeyPair keyPair = new ECKeyPair(privKey, publicKey);
 
-		//byte[] msgHash = Hash.sha3(msg);
+		// byte[] msgHash = Hash.sha3(msg);
 		Sign.SignatureData signature = Sign.signMessage(msg, keyPair, true);
 
 		byte[][] signatureBts = new byte[2][];
-		
+
 		signatureBts[0] = new byte[33];
 		signatureBts[1] = new byte[32];
 
 		System.arraycopy(signature.getR(), 0, signatureBts[0], 0, signature.getR().length);
 		signatureBts[0][32] = signature.getV();
 		signatureBts[1] = Arrays.copyOfRange(signature.getS(), 0, signature.getS().length);
-		
-		
+
 		System.out.println("\n --- getTransactionSignatureData ---");
 		System.out.println("PK: " + Converter.byteArrayToHexString(keyPair.getPrivateKey().toByteArray()));
 		System.out.println("PubKey: " + Converter.byteArrayToHexString(keyPair.getPublicKey().toByteArray()));
@@ -129,7 +237,8 @@ public class Crypto {
 		return signatureBts;
 	}
 
-	public static boolean verifyTransaction(byte[] address, byte[] msg, byte v, byte[] r, byte[] s) throws SignatureException {
+	public static boolean verifyTransaction(byte[] address, byte[] msg, byte v, byte[] r, byte[] s)
+			throws SignatureException {
 
 		Sign.SignatureData signature = new Sign.SignatureData(v, r, s);
 
@@ -142,27 +251,13 @@ public class Crypto {
 		System.out.println("rPKCompress: " + Converter.byteArrayToHexString(pubKeyRecoveredCompressed));
 		System.out.println("rAddress: " + Converter.byteArrayToHexString(addressRecovered));
 		System.out.println(" --- END verifyTransaction--- \n");
-		
+
 		if (Arrays.equals(address, addressRecovered)) {
 			return true;
 		}
 
 		return false;
 	}
-
-	// public static boolean verifyTransaction(String address, byte[] msg, byte v,
-	// byte[] r, byte[] s) {
-	//
-	// Sign.SignatureData signature = new Sign.SignatureData(v, r, s);
-	//
-	// BigInteger pubKeyRecovered = Sign.signedMessageToKey(msg, signature);
-	//
-	// System.out.println("Recovered public key: " + pubKeyRecovered.toString(16));
-	//
-	// boolean validSig = pubKey.equals(pubKeyRecovered);
-	//
-	// System.out.println("Signature valid? " + validSig);
-	// }
 
 	public static byte[] sha256(String rowText) {
 		try {
