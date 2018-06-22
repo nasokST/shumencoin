@@ -10,11 +10,13 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.beans_data.helper.TransactionHelper;
 import com.shumencoin.constants.Constants;
 import com.shumencoin.convertion.Converter;
 import com.shumencoin.crypto.Crypto;
+import com.shumencoin.crypto.CryptoData;
 import com.shumencoin.errors.ShCError;
 
 public class CryptoTest {
@@ -100,8 +102,12 @@ public class CryptoTest {
 	String json = Crypto.encryptionPrivateKey(password, privateKey, address);
 
 	// password= "beer1";
+	
+	// Parse JSON
+	ObjectMapper objectMapper = new ObjectMapper();
+	CryptoData cryptoData = objectMapper.readValue(json, CryptoData.class);	
 
-	byte[] decodedPrivateKey = Crypto.decryptPrivateKey(json, password);
+	byte[] decodedPrivateKey = Crypto.decryptPrivateKey(cryptoData, password);
 
 	assertTrue("Private key not valid", (Arrays.equals(privateKey, decodedPrivateKey)));
     }

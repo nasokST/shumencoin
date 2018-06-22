@@ -1,4 +1,4 @@
-package com.shumencoin.databind;
+package com.shumencoin.crypto.databind;
 
 import java.io.IOException;
 

@@ -154,14 +154,14 @@ public class Crypto {
 	return json;
     }
 
-    public static byte[] decryptPrivateKey(String rawJson, String rawPassword) throws JsonParseException,
+    public static byte[] decryptPrivateKey(CryptoData cryptoData, String rawPassword) throws JsonParseException,
 	    JsonMappingException, IOException, DataLengthException, InvalidCipherTextException {
 
 	byte[] password = rawPassword.getBytes(Charset.forName("UTF-8"));
 
-	// Parse JSON
-	ObjectMapper objectMapper = new ObjectMapper();
-	CryptoData cryptoData = objectMapper.readValue(rawJson, CryptoData.class);
+//	// Parse JSON
+//	ObjectMapper objectMapper = new ObjectMapper();
+//	CryptoData cryptoData = objectMapper.readValue(rawJson, CryptoData.class);
 
 	// SCrypt
 	byte[] cryptHash = generateSCryptHash(password, cryptoData);

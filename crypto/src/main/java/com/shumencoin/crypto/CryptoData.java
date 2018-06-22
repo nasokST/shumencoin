@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.shumencoin.databind.ByteArrayDeserializer;
-import com.shumencoin.databind.ByteArraySerializer;
+import com.shumencoin.crypto.databind.ByteArrayDeserializer;
+import com.shumencoin.crypto.databind.ByteArraySerializer;
 
-class CryptoData implements Serializable {
+public class CryptoData implements Serializable {
 
 	/**
 	 * 

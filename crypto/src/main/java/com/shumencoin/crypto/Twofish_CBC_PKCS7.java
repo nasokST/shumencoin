@@ -15,7 +15,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * @author 
  *
  */
-class Twofish_CBC_PKCS7 {
+public class Twofish_CBC_PKCS7 {
 
 	private final BlockCipher twofishCipher;
 
