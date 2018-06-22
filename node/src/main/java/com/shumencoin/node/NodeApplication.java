@@ -33,6 +33,7 @@ import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.NotificationBaseData;
+import com.shumencoin.beans_data.TransactionData;
 import com.shumencoin.errors.ShCError;
 
 @SpringBootApplication
@@ -126,27 +127,6 @@ public class NodeApplication {
 		}
 
 		return ShCError.NO_ERROR;
-
-//		Integer numberOfSyncronizedBlocks = new Integer(0);
-//		Boolean needOtherPearToBeNotyfied = new Boolean(false);
-//
-//		error = synchronizeeBlocksWithPear(currentNode, peerNotificationData.getUrl(), numberOfSyncronizedBlocks, needOtherPearToBeNotyfied);
-//		if (ShCError.NO_ERROR != error) {
-//			return error;
-//		}
-//
-//		String skipNodeId = new String(skipNodeId = peerNotificationData.getNodeId());
-//		if (needOtherPearToBeNotyfied) {
-//			skipNodeId = "";		
-//		
-////			NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
-////			notifyPear(peerNotificationData.getUrl(), notificatePearData);
-//		}
-//
-//		NotificationBaseData notificatePearData = new NotificationBaseData(currentNode, false);
-//		notifyPeersForNewBlock(currentNode, notificatePearData, skipNodeId);
-//
-//		return ShCError.NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -173,6 +153,13 @@ public class NodeApplication {
 		return error;
 	}
 	
+	/**
+	 * 
+	 * @param currentNode
+	 * @param peerNotificationData
+	 * @param disableCallBackNotification
+	 * @return
+	 */
 	@Async
 	public static ShCError synchronizeeBlocksWithPear(Node currentNode, NotificationBaseData peerNotificationData, boolean disableCallBackNotification) {
 
@@ -198,14 +185,6 @@ public class NodeApplication {
 
 		return ShCError.NO_ERROR;
 	}	
-
-//	@Async
-//	private static ShCError synchronizeeBlocksWithPear(Node currentNode, String otherNodeUrl) {
-//		Integer numberOfSyncronizedBlocks = new Integer(0);
-//		Boolean needOtherPearToBeNotyfied = new Boolean(false);
-//		return synchronizeeBlocksWithPear(currentNode, otherNodeUrl, numberOfSyncronizedBlocks,
-//				needOtherPearToBeNotyfied);
-//	}
 
 	/**
 	 * 
@@ -237,6 +216,12 @@ public class NodeApplication {
 		return ShCError.UNKNOWN;
 	}
 
+	/**
+	 * 
+	 * @param node
+	 * @param notificationBaseData
+	 * @param skipNodeId
+	 */
 	@Async
 	private static void notifyPeersForNewBlock(Node node, NotificationBaseData notificationBaseData, String skipNodeId) {
 		for (Map.Entry<String, String> peer : node.getNode().getPeers().entrySet()) {
@@ -266,6 +251,35 @@ public class NodeApplication {
 		}
 
 		postRequest(peerHost + "/peers/notify-new-block", newBlockJson);
+	}
+
+	@Async
+	public static void sendTransactionToAllPeers(Node currentNode, TransactionData transaction, String fromNodeId) {
+
+		if ((!fromNodeId.equals("")) && null == currentNode.getNode().getPeers().get(fromNodeId)) {
+			return;
+		}
+
+		for (Map.Entry<String, String> peer : currentNode.getNode().getPeers().entrySet()) {
+			if (!peer.getKey().equals(fromNodeId)) {
+				sendTransactionToPeer(peer.getValue(), transaction, currentNode.getNode().getNodeId());
+			}
+		}
+	}
+
+	@Async
+	private static void sendTransactionToPeer(String peerHost, TransactionData transaction, String currentNodeId) {
+		ObjectMapper ow = new ObjectMapper();
+		String newTransactionJson = null;
+
+		try {
+			newTransactionJson = ow.writeValueAsString(transaction);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		postRequest(peerHost + "/transactions/send/" + currentNodeId, newTransactionJson);
 	}
 
 	private static ShCError postRequest(String toUrl, String jsonData) {

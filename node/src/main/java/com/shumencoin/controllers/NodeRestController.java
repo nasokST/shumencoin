@@ -84,21 +84,46 @@ public class NodeRestController {
 		}
 	}
 
-	@PostMapping("/transactions/send")
+	@PostMapping("/transactions/send/faucet")
 	public ResponseEntity<?> getTransactionSend(@RequestBody String address) {
-	    String addressString = address.substring(0, address.length()-1);
-	    if(node.getBlockchain().generateFaucetTransaction(addressString)) {
+		String addressString = address.substring(0, address.length() - 1);
+
+		TransactionData td = node.getBlockchain().generateFaucetTransaction(addressString);
+		
+		if (null != td) {
+			// notify all current node peers
+			NodeApplication.sendTransactionToAllPeers(node, td, "");
+
+			return new ResponseEntity<Object>("Success", HttpStatus.OK);
+		} else {
+			return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PostMapping("/transactions/send/{senderNodeId}")
+	public ResponseEntity<?> getTransactionSend(@RequestBody TransactionData newTransaction, @PathVariable String senderNodeId) {
+
+		String senderNodeUrl = node.getNode().getPeers().get(senderNodeId);
+		if (null == senderNodeUrl) {
+			return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
+		}
+
+		ShCError error = node.getBlockchain().pendingTransactionsAdd(newTransaction);
+		if (ShCError.NO_ERROR != error) {
+			return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
+		}
+
+		// notify all current node peers
+		NodeApplication.sendTransactionToAllPeers(node, newTransaction, senderNodeId);
+
 		return new ResponseEntity<Object>("Success", HttpStatus.OK);
-	    } else {
-		return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
-	    }
 	}
 
 	@RequestMapping("/transactions/balances")
 	public List<BalanceBean> getBalances() {
-	    return node.getBlockchain().getBalances();
+		return node.getBlockchain().getBalances();
 	}
-	
+
 	// ====== ADDRESS =====
 	@RequestMapping("/address/{address}/transactions")
 	public ResponseEntity<?> addressGetTransactions() {
@@ -130,7 +155,7 @@ public class NodeRestController {
 
 	@PostMapping("/peers/notify-new-block")
 	public ResponseEntity<?> getPeersNotifyForNewBlock(@RequestBody NotificationBaseData notificationData) {
-		
+
 		ShCError error = NodeApplication.OnNewBlockNotification(node, notificationData);
 		if (ShCError.NO_ERROR == error) {
 			return new ResponseEntity<Object>(error, HttpStatus.OK);

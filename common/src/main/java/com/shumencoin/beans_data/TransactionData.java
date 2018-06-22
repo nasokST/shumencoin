@@ -31,8 +31,8 @@ public class TransactionData implements Serializable {
 
     public TransactionData() {
     	senderSignature = new byte[2][];
-    	senderSignature = new byte[0][33];
-    	senderSignature = new byte[1][32];
+    	senderSignature[0] = new byte[33];
+    	senderSignature[1] = new byte[32];
     }
 
     public TransactionData(TransactionData other) {
@@ -47,31 +47,26 @@ public class TransactionData implements Serializable {
     	this.setTransactionDataHash(other.getTransactionDataHash());
 
     	this.senderSignature = new byte[2][];
-    	this.senderSignature = new byte[0][33];
-    	this.senderSignature = new byte[1][32];
+    	this.senderSignature[0] = new byte[33];
+    	this.senderSignature[1] = new byte[32];
 		this.senderSignature[0] = Arrays.copyOf(other.getSenderSignature()[0], other.getSenderSignature()[0].length);
     	this.senderSignature[1] = Arrays.copyOf(other.getSenderSignature()[1], other.getSenderSignature()[1].length);
 
     	this.setMinedInBlockIndex(other.getMinedInBlockIndex());
     	this.setTransferSuccessful(other.isTransferSuccessful());
-    }   
+    }
+    
+    public boolean equals(Object object) {
 
-//	public TransactionData(String from, String to, long value, long fee, String dateCreated, String data,
-//			String senderPubKey, String transactionDataHash, String senderSignature, long minedInBlockIndex,
-//			boolean transferSuccessful) {
-//		super();
-//		this.from = from;
-//		this.to = to;
-//		this.value = value;
-//		this.fee = fee;
-//		this.dateCreated = dateCreated;
-//		this.data = data;
-//		this.senderPubKey = senderPubKey;
-//		this.transactionDataHash = transactionDataHash;
-//		this.senderSignature = senderSignature;
-//		this.minedInBlockIndex = minedInBlockIndex;
-//		this.transferSuccessful = transferSuccessful;
-//	}
+    	TransactionData other = (TransactionData)object;
+
+    	if (this.getTransactionDataHash().equals(other.getTransactionDataHash())) {
+    		return true;
+    	}
+
+    	return false;
+    }
+
 
 	public String getFrom() {
 		return from;

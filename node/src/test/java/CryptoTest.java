@@ -99,7 +99,7 @@ public class CryptoTest {
 
 		String json = Crypto.encryptionPrivateKey(password, privateKey);
 		
-		password= "beer1";
+		//password= "beer1";
 
 		byte[] decodedPrivateKey = Crypto.decryptPrivateKey(json, password);
 
