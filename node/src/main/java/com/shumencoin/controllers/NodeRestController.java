@@ -149,12 +149,12 @@ public class NodeRestController {
 
     @PostMapping("/wallet/transaction")
     public ResponseEntity<?> walletSendTransaction(@RequestBody WalletSendTransactionData walletSendTransactionData) {
-	
+
 	ShCError error = NodeApplication.OnWalletNewTransaction(node, walletSendTransactionData);
-    	if (ShCError.NO_ERROR == error) {
-    	return new ResponseEntity<Object>(error, HttpStatus.OK);
-    	}
-	
+	if (ShCError.NO_ERROR == error) {
+	    return new ResponseEntity<Object>(error, HttpStatus.OK);
+	}
+
 	return new ResponseEntity<Object>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

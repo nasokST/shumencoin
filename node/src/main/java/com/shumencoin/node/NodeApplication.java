@@ -2,6 +2,7 @@ package com.shumencoin.node;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -189,22 +190,19 @@ public class NodeApplication {
 
 	tr.setDateCreated(Constants.dateTimeToIsoStr(LocalDateTime.now()));
 	tr.setSenderPubKey(Converter.byteArrayToHexString(Crypto.generatePublicKey(privateKey)));
-
-	tr.setSenderSignature(Constants.genesisSignature);
 	tr.setMinedInBlockIndex(0);
 	tr.setTransferSuccessful(true);
-
 	TransactionHelper.calculateAndSetTransactionDataHash(tr);
-
-	if (TransactionHelper.isValidTransactionData(tr)) {
-	    return ShCError.TRANSACTION_IS_NOT_VALID;
-	}
 	
-	ShCError error = currentNode.getBlockchain().pendingTransactionsAdd(tr);
-
+	ShCError error = TransactionHelper.sign(tr, privateKey);
 	if (ShCError.NO_ERROR != error) {
 	    return error;
-	}	
+	}
+
+	error = currentNode.getBlockchain().pendingTransactionsAdd(tr);
+	if (ShCError.NO_ERROR != error) {
+	    return error;
+	}
 
 	return ShCError.NO_ERROR;
     }
