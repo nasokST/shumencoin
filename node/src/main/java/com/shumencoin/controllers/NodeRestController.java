@@ -90,14 +90,10 @@ public class NodeRestController {
 
 	@PostMapping("/transactions/send/faucet")
 	public ResponseEntity<?> getTransactionSend(@RequestBody String address) {
-		String addressString = address.substring(0, address.length() - 1);
-
-		TransactionData td = node.getBlockchain().generateFaucetTransaction(addressString);
-		
+		TransactionData td = node.getBlockchain().generateFaucetTransaction(address);
 		if (null != td) {
 			// notify all current node peers
 			NodeApplication.sendTransactionToAllPeers(node, td, "");
-
 			return new ResponseEntity<Object>("Success", HttpStatus.OK);
 		} else {
 			return new ResponseEntity<Object>("Transaction not created", HttpStatus.BAD_REQUEST);
