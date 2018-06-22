@@ -14,6 +14,8 @@ class CryptoData implements Serializable {
 	 */
 	private static final long serialVersionUID = 6562117600785066567L;
 
+	public String address;
+
 	public SCryptData script;
 	@JsonDeserialize(using = ByteArrayDeserializer.class)
 	@JsonSerialize(using = ByteArraySerializer.class)

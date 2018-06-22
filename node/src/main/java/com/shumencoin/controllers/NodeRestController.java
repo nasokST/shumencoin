@@ -3,6 +3,8 @@ package com.shumencoin.controllers;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.shumencoin.beans.Node;
 import com.shumencoin.beans_data.BalanceBean;
 import com.shumencoin.beans_data.BlockData;
 import com.shumencoin.beans_data.MiningJobData;
 import com.shumencoin.beans_data.NotificationBaseData;
 import com.shumencoin.beans_data.TransactionData;
+import com.shumencoin.crypto.Crypto;
 import com.shumencoin.errors.ShCError;
 import com.shumencoin.node.NodeApplication;
 
@@ -123,6 +127,25 @@ public class NodeRestController {
 	public List<BalanceBean> getBalances() {
 		return node.getBlockchain().getBalances();
 	}
+	
+	// ====== ADDRESS =====
+	@GetMapping("/wallet/account")
+	public ResponseEntity<?> getWalletAccount(@RequestBody String password) {
+		byte[] privateKey = Crypto.generatePrivateKey();
+		byte[] address = Crypto.generateAddressByPrivateKey(privateKey);
+
+		try {
+			String encryptedPassword = Crypto.encryptionPrivateKey(password, privateKey, address);
+			return new ResponseEntity<Object>(encryptedPassword, HttpStatus.OK);			
+		} catch (DataLengthException e) {
+		} catch (InvalidCipherTextException e) {
+		} catch (JsonProcessingException e) {
+		}
+
+		return new ResponseEntity<Object>("Error", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	
 
 	// ====== ADDRESS =====
 	@RequestMapping("/address/{address}/transactions")
