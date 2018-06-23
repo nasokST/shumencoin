@@ -173,7 +173,7 @@ public class Crypto {
 	Twofish_CBC_PKCS7 twofish_CBC_PKCS7 = new Twofish_CBC_PKCS7();
 
 	twofish_CBC_PKCS7.setKey(encryption_key);
-	byte[] decryptedMessage = twofish_CBC_PKCS7.decrypt(cryptoData.twofish, cryptoData.iv);
+	byte[] decryptedMessage = twofish_CBC_PKCS7.decrypt(cryptoData.twofish, cryptoData.iv); //TODO check why it's not okey
 
 	System.out.println("Decrypted message: " + Converter.byteArrayToHexString(decryptedMessage));
 

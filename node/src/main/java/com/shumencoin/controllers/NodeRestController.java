@@ -134,6 +134,11 @@ public class NodeRestController {
     // ====== WALLET =====
     @PostMapping("/wallet/account")
     public ResponseEntity<?> walletGetAccount(@RequestBody String password) {
+	
+	if("=".equals(password.substring(password.length()-1, password.length()))) {
+	    password = password.substring(0, password.length()-1);
+	}
+	
 	byte[] privateKey = Crypto.generatePrivateKey();
 	byte[] address = Crypto.generateAddressByPrivateKey(privateKey);
 
